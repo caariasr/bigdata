@@ -34,7 +34,7 @@ Here we connect to our database
 library(plyr)
 #allbyzipmonth <- dbGetQuery(conn, "select * from allbyzipmonth")
 #saveRDS(allbyzipmonth, file="allbyzipmonth.rds")
-allbyzipmonth <- readRDS("allbyzipmonth.rds")
+allbyzipmonth <- readRDS("data/allbyzipmonth.rds")
 allbyzipmonth$month <- mapvalues(allbyzipmonth$month, 
                                  c(paste("0", 1:9, sep=''), "10", "11", "12"), month.name) 
 
@@ -170,7 +170,7 @@ loaded the view here.
 ```{r load data }
 #allbyzip <- dbGetQuery(conn, "select * from cadms.allbyzip")
 # saveRDS(allbyzip, file="allbyzip.rds")
-allbyzip <- readRDS("allbyzip.rds")
+allbyzip <- readRDS("data/allbyzip.rds")
 head(allbyzip)
 ```
 
