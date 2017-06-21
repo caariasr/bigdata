@@ -1,0 +1,283 @@
+---
+title: "Big data post module assignment"
+author: "CADMS"
+date: "6/18/2017"
+output:
+  html_document:
+    keep_md: yes
+runtime: shiny
+resource_files:
+- car698.Rproj
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# source('/gridapps/hive/HIVERJARS/connect2hive.R')
+```
+
+```{r packages, include=FALSE, message=FALSE}
+library(knitr)
+library(shiny)
+library(highr)
+library(base64enc)
+library(png)
+```
+
+## Connect to database CADMS
+Here we connect to our database
+```{r connect, eval=FALSE}
+# conn = dbConnect(drv,"jdbc:hive2://bigdata.stern.nyu.edu:10000/cadms;auth=noSasl","","")
+```
+## Bring the views into R for visualizations
+
+```{r get views, message=FALSE}
+library(plyr)
+#allbyzipmonth <- dbGetQuery(conn, "select * from allbyzipmonth")
+#saveRDS(allbyzipmonth, file="allbyzipmonth.rds")
+allbyzipmonth <- readRDS("allbyzipmonth.rds")
+allbyzipmonth$month <- mapvalues(allbyzipmonth$month, 
+                                 c(paste("0", 1:9, sep=''), "10", "11", "12"), month.name) 
+
+allbyzipmonth$month <- factor(allbyzipmonth$month, levels = month.name)
+head(allbyzipmonth)
+```
+
+## Initial analysis
+### Restaurant calls and violations
+An initial question of interest for the analysis is: Is there a linear 
+relation between the number of 311 calls for restaurants and the number of
+violations per month per zip code?
+
+```{r correlations}
+cor(allbyzipmonth$restaurant_calls, allbyzipmonth$restaurant_violations)
+```
+The correlation between restaurant 311 calls and violations is `r round(cor(allbyzipmonth$restaurant_calls, allbyzipmonth$restaurant_violations), 2)`. It would be a good idea to go back to the location_type used to filter the 311 calls specific about restaurants and see if there were some missing categories that could be included as restaurants. Assuming there is no missing calls counted
+as 311 restaurant calls, we can conclude that there is not a strong linear relationship
+between restaurant 311 calls and violations. Nevertheless we can test the null hypothesis
+that the population's true linear correlation is zero:
+
+```{r test correlation}
+cor.test(allbyzipmonth$restaurant_calls, allbyzipmonth$restaurant_violations)
+```
+
+The p-value for the correlation test is less than 2.2e-16 so we reject the null hypothesis 
+that the true linear correlation between 311 calls and violations for restaurants is zero.
+
+### Housing calls and violations
+The same question applies to the relationship between housing calls and violations:
+```{r housing cor}
+cor(allbyzipmonth$housing_violations, allbyzipmonth$housing_calls)
+```
+The correlation is `r round(cor(allbyzipmonth$housing_violations, allbyzipmonth$housing_calls), 2)`. 
+In this case, there is a strong linear relationship between calls and violations for housing.
+
+### Correlation matrix
+
+```{r all cors}
+cor(allbyzipmonth[,c(2,4:7)])
+```
+
+Finally we produce a correlation matrix to look for any other linear relationship between our variables. We can see that the population has a linear relationship with the housing calls 
+(`r round(cor(allbyzipmonth$population, allbyzipmonth$housing_calls), 2)`)
+and violations (`r round(cor(allbyzipmonth$population, allbyzipmonth$housing_violations), 2)`).
+
+
+## Visualizations
+### Housing
+```{r houseVis, fig.height=5, fig.width=15, retina=1, message=FALSE}
+library(ggvis)
+library(dplyr)
+allbyzipmonth %>% 
+    ggvis(x=~housing_calls, y=~housing_violations) %>%
+    filter(allbyzipmonth$month %in% 
+             eval(input_checkboxgroup(choices=month.name, 
+                                      selected = month.name, label = "Month"))) %>% 
+    layer_points(fill = ~factor(month)) %>%
+    add_axis("x", title = "Number of 311 calls per zipcode") %>%
+    add_axis("y", title = "Number of housing violations") %>%
+    scale_numeric("x", domain = c(0, 4000), nice = FALSE) %>%
+    scale_numeric("y", domain = c(0, 4000), nice = FALSE)
+```
+
+**Fast conclusions**: October was a different behavior. November and December have no data
+Maybe looking by month is not a good idea since the inspections dates are lagged 
+compared to the 311 call dates (Consider bringing another grouping variable). Finally,
+it looks like they don't do inspections at the end of the year (could also be a reason
+for the different behavior in October, which is less calls and less violations, 
+the calls part shouldn't happen though).
+
+### Restaurants
+```{r resVis, fig.height=5, fig.width=15, retina=1}
+allbyzipmonth %>% 
+    ggvis(x=~restaurant_calls, y=~restaurant_violations) %>%
+    filter(allbyzipmonth$month %in% 
+             eval(input_checkboxgroup(choices=month.name, 
+                                      selected = month.name, label = "Month"))) %>% 
+    layer_points(fill = ~month) %>%
+    add_axis("x", title = "Number of 311 calls per zipcode") %>%
+    add_axis("y", title = "Number of restaurant violations") %>%
+    scale_numeric("x", domain = c(0, 200), nice = FALSE) %>%
+    scale_numeric("y", domain = c(0, 600), nice = FALSE)
+```
+
+**Fast conclusions**: NO apparent linear relationship in one of the months or a group of them
+. The behavior in each month is similar to the overall result. October behaves differently from other months as well.
+
+
+### Population and housing
+```{r pophous, fig.height=5, fig.width=15, retina=1}
+allbyzipmonth %>% 
+    ggvis(x=~population, y=input_select(c("housing_calls", "housing_violations"), 
+                                         label="Choose calls or violations",  
+                                         map = as.name)) %>%
+    filter(allbyzipmonth$month %in% 
+             eval(input_checkboxgroup(choices=month.name, 
+                                      selected = month.name, label = "Month"))) %>% 
+    layer_points(fill = ~month) %>%
+    add_axis("x", title = "Population", properties=axis_props(title=list(dy=-50))) %>%
+    add_axis("y", title = "Number of housing calls/violations", 
+             properties=axis_props(title=list(dy=-50))) %>%
+    scale_numeric("x", domain = c(0, 110000), nice = T) %>%
+    scale_numeric("y", domain = c(0, 3000), nice = T)
+```
+
+**Fast conclusions:** There are differences by month, October again has lower calls and violations than the rest. Low populated zip codes tend to have
+close to 0 calls and violations
+
+### Population and restaurants
+```{r popres, fig.height=5, fig.width=15, retina=1}
+allbyzipmonth %>% 
+    ggvis(x=~population, y=input_select(c("restaurant_calls", "restaurant_violations"), 
+                                         label="Choose calls or violations",  
+                                         map = as.name)) %>%
+    filter(allbyzipmonth$month %in% 
+             eval(input_checkboxgroup(choices=month.name, 
+                                      selected = month.name, label = "Month"))) %>% 
+    layer_points(fill = ~month) %>%
+    add_axis("x", title = "Population", properties=axis_props(title=list(dy=-50))) %>%
+    add_axis("y", title = "Number of restaurant calls/violations", 
+             properties=axis_props(title=list(dy=-50)))
+```
+
+**Fast conclusions:** There are differences by month, October again has lower calls and violations than the rest. There seems to be a relationship between calls and population in terms of the range of the calls, the maximum value observed in calls increases as the population increaser, around 
+60000 it starts decreasing again (And we see an outlier of 200 calles in a zipcode close to 90000 people). This effect is not seen with the violations.
+
+
+### Analysis by zipcode only
+
+We went back to hive and created aggregated views by zipcode only, we then merged by zipcode and
+loaded the view here.
+```{r load data }
+#allbyzip <- dbGetQuery(conn, "select * from cadms.allbyzip")
+# saveRDS(allbyzip, file="allbyzip.rds")
+allbyzip <- readRDS("allbyzip.rds")
+head(allbyzip)
+```
+
+## Visualizations by zipcode only
+Since we found that the violations don't happen in the last two months (November had one math and December 0). We decided
+to create another joined table only by zipcode, we believe that a significant amount of calls was not being match just due
+to the fact of taking place in the last two months of the year.
+
+### Housing
+```{r houseVis2, fig.height=5, fig.width=15, retina=1}
+allbyzip %>% 
+    ggvis(x=~housing_calls, y=~housing_violations) %>%
+    layer_points() %>%
+    add_axis("x", title = "Number of 311 calls per zipcode") %>%
+    add_axis("y", title = "Number of housing violations",
+             properties=axis_props(title=list(dy=-30)))
+```
+
+**Fast conclusions:** There is a strong linear relationship as we saw on the previous analysis. Also there is
+heteroscedasticity (The bigger the number of calls, the bigger the variance). This is to be 
+expected since is count data.
+
+### Restaurants
+```{r resVis2, fig.height=5, fig.width=15, retina=1}
+allbyzip %>% 
+    ggvis(x=~restaurant_calls, y=~restaurant_violations) %>%
+    layer_points() %>%
+    add_axis("x", title = "Number of 311 calls per zipcode") %>%
+    add_axis("y", title = "Number of restaurant violations", 
+             properties=axis_props(title=list(dy=-30)))
+```
+
+**Fast conclusions:** There is a weak linear relationship as we saw in previous analysis.
+
+### Population and housing
+```{r housepopVis, fig.height=5, fig.width=15, retina=1}
+allbyzip %>% 
+    ggvis(x=~population, y=input_select(c("housing_calls", "housing_violations"), 
+                                         label="Choose calls or violations",  
+                                         map = as.name)) %>%
+    layer_points() %>%
+    add_axis("x", title = "Population") %>%
+    add_axis("y", title = "Calls/Violations", properties=axis_props(title=list(dy=-30))) %>%
+    scale_numeric("x", domain = c(0, 110000), nice = T) %>%
+    scale_numeric("y", domain = c(0, 26000), nice = T)
+```
+
+**Fast conclusions:** The violations have more dispersion than calls. There seems to be a relationship for both housing calls and violations with population (heteroscedasticity in count data is expected again).
+
+#### Population and restaurants
+```{r respopVis, fig.height=5, fig.width=15, retina=1}
+allbyzip %>% 
+    ggvis(x=~population, y=input_select(c("restaurant_calls", "restaurant_violations"), 
+                                         label="Choose calls or violations",  
+                                         map = as.name)) %>%
+    layer_points() %>%
+    add_axis("x", title = "Population") %>%
+    add_axis("y", title = "Calls/Violations", properties=axis_props(title=list(dy=-30))) %>%
+    scale_numeric("x", domain = c(0, 110000), nice = T) %>%
+    scale_numeric("y", domain = c(0, 4500), nice = T)
+```
+
+**Fast conclusions:** The violations have more dispersion than calls. There seems to be a relationship for both restaurant calls and violations with population (heteroscedasticity in count data is expected again). The difference in scale for restaurants is quite big (The range of the violations is from 0 to almost 4500, while in calls is from 0 to 800, maybe we are missing restaurant calls?)
+
+### Maps
+#### Housing violations
+
+```{r housemaps, message=FALSE, message=FALSE}
+library(ggmap)
+library(zipcode)
+data("zipcode")
+names(zipcode)[1] <- "zipcode"
+allcoordzip <- merge(zipcode, allbyzip)
+rm(zipcode)
+# get map
+map<-get_map(location='New York City',maptype = "terrain", source='google')
+ggmap(map) + geom_point(
+        aes(x=longitude, y=latitude, colour=housing_violations), 
+        data=allcoordzip, alpha=1, na.rm = T)  + 
+        scale_color_gradient(low="green", high="red")
+```
+
+**Fast conclusions:** We can see that the critical areas in terms of housing violations 
+are the bronx and brooklyn? (Maybe add more specifics?). The ones with less violations are south of manhattan and queens (I think).
+
+#### Restaurant violations
+```{r resmaps, message=FALSE, message=FALSE}
+# get map
+map<-get_map(location='New York City',maptype = "terrain", source='google')
+ggmap(map) + geom_point(
+        aes(x=longitude, y=latitude, colour=restaurant_violations), 
+        data=allcoordzip, alpha=1, na.rm = T)  + 
+        scale_color_gradient(low="green", high="red")
+```
+
+**Fast conclusions:** The only critical area I see here is lower manhattan. 
+
+
+#### Population
+```{r popmaps, message=FALSE, message=FALSE}
+# get map
+map<-get_map(location='New York City',maptype = "terrain", source='google')
+ggmap(map) + geom_point(
+        aes(x=longitude, y=latitude, colour=population), 
+        data=allcoordzip, alpha=1, na.rm = T)  + 
+        scale_color_gradient(low="green", high="red")
+```
+
+**Fast conclusions:** Is this useful? I see that some highly populated areas match those with high numbers of housing violations (But we saw this in the previous analysis)
+
