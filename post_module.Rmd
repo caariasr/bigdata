@@ -41,6 +41,23 @@ allbyzipmonth$month <- mapvalues(allbyzipmonth$month,
 allbyzipmonth$month <- factor(allbyzipmonth$month, levels = month.name)
 head(allbyzipmonth)
 ```
+##Data Cleaning Process
+
+The first step of the data cleaning process was to move the tables from the msba.popbyzip2010, msba.nyc311calls2016, and msba.nycrestaurants, to cadms.popbyzip2010 on the big data server.
+
+The second step focused on cleaning the data under zip code in all three tables. Some of the zip codes had incorrect format, such as additional digits and symbols. The symbols were removed and the first five digits were extracted as 'true' zip codes. Subsequently the zip codes were converted to numbers.
+
+The NYC 311 calls were restricted by location type of violation to include initially: restaurant, residential, family, and private house. However, further inspection into the 311 call files revealed that other types of location should be included, namely: apartment and residence. As for the restaurant violation files, the following were added for filtration: bars, clubs, bakery, deli, cafeteria, catering, food cart, and soup kitchen. The new approach is meant to broaden the selection process and hence improve the accuracy of the results.
+
+The location type data had formatting issues such as: the same word written in lower and upper cases. Same location mentioned more than once in different formats and groups i.e. residential and residential/House. There are N/As and mixed used housing (residential and none). All these issues had to be identified and fixed by unifying the data. 
+
+Some columns were incorrectly labeled and therefore the columns were re-labeled based on the data it contained. This was observed in the following columns: x_coordinate_state_plane, y_coordinate_state_plane, borough, longitude, latitude, location, and junk.
+
+Some cities were mentioned multiple times as unique instances, in lower case and upper case. i.e. Astoria vs. ASTORIA. Some cities were described with more than one unique identifier i.e. BELLEROSE vs. BELLEROSE VILLAGE. Some cities were misspelled i.e. CEDARHURST vs. CEDERHURST. One field was missing data.
+
+The restaurant violations and housing violations files were restricted to year 2016 given that the NYC 311 calls??? file covered only the year of 2016.
+
+The ???Created Date??? was selected as a variable from the NYC 311 calls and the ???Inspection Date??? in both restaurant and housing violations files were chosen to match that date. At a later check, the ???Inspection Date??? was replaced by ???Record Date??? as it preceded inspection and better matched ???Created Date???.
 
 ## Initial analysis
 ### Restaurant calls and violations
