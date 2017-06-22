@@ -52,9 +52,7 @@ violations per month per zip code?
 cor(allbyzipmonth$restaurant_calls, allbyzipmonth$restaurant_violations)
 ```
 The correlation between restaurant 311 calls and violations is `r round(cor(allbyzipmonth$restaurant_calls, allbyzipmonth$restaurant_violations), 2)`. It would be a good idea to go back to the location_type used to filter the 311 calls specific about restaurants and see if there were some missing categories that could be included as restaurants. Assuming there is no missing calls counted
-as 311 restaurant calls, we can conclude that there is not a strong linear relationship
-between restaurant 311 calls and violations. Nevertheless we can test the null hypothesis
-that the population's true linear correlation is zero:
+as 311 restaurant calls, we can conclude that there is not a strong linear relationship between restaurant 311 calls and violations. Nevertheless we can test the null hypothesis that the population's true linear relationship is zero:
 
 ```{r test correlation}
 cor.test(allbyzipmonth$restaurant_calls, allbyzipmonth$restaurant_violations)
