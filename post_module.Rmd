@@ -69,6 +69,21 @@ The restaurant violations and housing violations files were restricted to year 2
 
 The "Created Date" was selected as a variable from the NYC 311 calls and the "Inspection Date" in both restaurant and housing violations files were chosen to match that date. At a later check, the "Inspection Date" was replaced by ???Record Date??? as it preceded inspection and better matched "Created Date".
 
+## Data Merging Process
+### Creation of Data Views
+The initial step in the data merging process centered on the creation of multiple views of each database filtered and grouped by relevant variables. The relevant variables were determined using the knowledge gained from the data Understanding and data cleaning processes. A total of four views were created during this step, they include:
+
+View 1 labeled restaurantcallsbyzipmonth referenced the nyc311callscleaned database to filter restaurant_calls by location_type to include locations with strings that had the words "restaurant", "cafe", and "cafateria". Once this filter was applied to the restaurant_calls, the data was then grouped by zipcode and month.
+
+View 2 labeled housingcallsbyzipmonth referenced the nyc311callscleaned database to filter housing_calls by location_type to include locations with strings that had the words "residentail", "family", and "private house". Once this filter was applied to the housing_calls, the data was then grouped by zipcode and month.
+
+View 3 labeled restaurantbyzipmonth referenced the nycrestaurantscleaned database to filter restaurant_violations by iscritical to include only the violations that are "critical". Once this filter was applied to the restaurant_violations, the data was then grouped by zipcode and month.
+
+View 4 labeled housingbyzipmonth referenced the housingcleaned database to group by zipcode and month.
+
+### Data Aggregation and Merge
+Following the creation of the four views in the step above, the next step consisted of data aggregation. The data aggregation step included...(need to finish)
+
 ## Initial analysis
 ### Restaurant calls and violations
 An initial question of interest for the analysis is: Is there a linear 
