@@ -153,8 +153,7 @@ allbyzipmonth %>%
     scale_numeric("y", domain = c(0, 3000), nice = T)
 ```
 
-**Fast conclusions:** There are differences by month, October again has lower calls and violations than the rest. Low populated zip codes tend to have
-close to 0 calls and violations
+**Initial conclusions** The number of housing calls (and separately violations) plotted against number of 311 calls per zip code shows some differences by months/seasons. Excluding October, which shows drastically different behavior than the other months and November and December which do not have any data, January-April tend to have  less concentrated data sets while May-September are more concentrated. There are many more zip codes with higher instances of housing calls and violations in the winter/spring - perhaps due to seasonality and corresponding utility effects . This relationship appears to have potential for further exploration.
 
 ### Population and restaurants
 ```{r popres, fig.height=5, fig.width=15, retina=1}
@@ -171,8 +170,9 @@ allbyzipmonth %>%
              properties=axis_props(title=list(dy=-50)))
 ```
 
-**Fast conclusions:** There are differences by month, October again has lower calls and violations than the rest. There seems to be a relationship between calls and population in terms of the range of the calls, the maximum value observed in calls increases as the population increaser, around 
-60000 it starts decreasing again (And we see an outlier of 200 calles in a zipcode close to 90000 people). This effect is not seen with the violations.
+**Initial conclusions** Population and the number of restaurant calls shows the same banding of seasonality as in 'population and housing.' Winter/spring months tend to show looser groupings with higher maximums than do summer/fall months with a global observation of maximums decreasing after Population 60,000.
+
+Restaurant violations plotted against population do not show the same pattern but do also have some slight differences in the maximum values with the winter/spring months being higher, to a less drastic degree than the number of calls
 
 
 ### Analysis by zipcode only
