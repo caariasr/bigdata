@@ -41,6 +41,11 @@ allbyzipmonth$month <- mapvalues(allbyzipmonth$month,
 allbyzipmonth$month <- factor(allbyzipmonth$month, levels = month.name)
 head(allbyzipmonth)
 ```
+
+##introduction
+
+
+
 ##Data Cleaning Process
 
 The first step of the data cleaning process was to move the tables from the msba.popbyzip2010, msba.nyc311calls2016, and msba.nycrestaurants, to cadms.popbyzip2010 on the big data server.
