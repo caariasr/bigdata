@@ -114,12 +114,9 @@ allbyzipmonth %>%
     scale_numeric("y", domain = c(0, 4000), nice = FALSE)
 ```
 
-**Fast conclusions**: October was a different behavior. November and December have no data
-Maybe looking by month is not a good idea since the inspections dates are lagged 
-compared to the 311 call dates (Consider bringing another grouping variable). Finally,
-it looks like they don't do inspections at the end of the year (could also be a reason
-for the different behavior in October, which is less calls and less violations, 
-the calls part shouldn't happen though).
+**Initial conclusions**: The number of housing violations plotted against the number of 311 calls per zipcode behaves in a significantly linear fashion by month and in aggregate; as one would expect, an increase in the number of calls relates to an increase in housing violations. 
+
+November and December do not have any reliable data points which could indicate that the city performs annual inspections or no inspections during this time, in lieu of inspections in response to 311 calls. October has consistently curious behavior over the course of this analysis in that it yields a low number of housing violations and a low number of 311 calls - this may be an error in the analysis process or a systemic factor of which the team does not have an understanding. 
 
 ### Restaurants
 ```{r resVis, fig.height=5, fig.width=15, retina=1}
