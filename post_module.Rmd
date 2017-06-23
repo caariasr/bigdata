@@ -4,7 +4,11 @@ author: "CADMS"
 date: "6/18/2017"
 output:
   html_document:
+    code_folding: hide
+    highlight: kate
     keep_md: yes
+    theme: readable
+    toc: yes
 runtime: shiny
 resource_files:
 - bigdata.Rproj
@@ -22,6 +26,8 @@ library(highr)
 library(base64enc)
 library(png)
 ```
+
+##introduction
 
 ## Connect to database CADMS
 Here we connect to our database
@@ -42,7 +48,6 @@ allbyzipmonth$month <- factor(allbyzipmonth$month, levels = month.name)
 head(allbyzipmonth)
 ```
 
-##introduction
 
 
 

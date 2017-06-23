@@ -41,3 +41,20 @@ The text inside the quotation marks can be changed. Or click in `commit to carlo
 Intead of carlos use your own name. Or in desktop fter you make a commit, on the top it should be an arrow and next to it should say push.
 
 8. Now you can go to https://github.com/caariasr/bigdata.git and make a pull request.
+
+## Getting the most recent version of the file
+
+### When you already made changes
+
+If you have changes to the .Rmd file but you want to have the most recent verion of the file (Let's you started working an hour ago but 5 minutes there was a pull request approved and you want that version)
+This are the steps:
+
+1. Commit your changes issuing 
+`git commit -am "Some text"`
+
+2. Issue the following command to get all commits from other people BEHIND your commits
+`git pull --rebase origin master`
+
+3. Now you have the most updated version + your local changes, you can either continue working or push your work for pull request.
+
+
