@@ -38,6 +38,6 @@ The text inside the quotation marks can be changed. Or click in `commit to carlo
 
 `git push origin carlos` 
 
-Intead of carlos use your own name. Or in desktop 
+Intead of carlos use your own name. Or in desktop fter you make a commit, on the top it should be an arrow and next to it should say push.
 
 8. Now you can go to https://github.com/caariasr/bigdata.git and make a pull request.
