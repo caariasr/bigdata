@@ -64,6 +64,13 @@ The restaurant violations and housing violations files were restricted to year 2
 
 The "Created Date" was selected as a variable from the NYC 311 calls and the "Inspection Date" in both restaurant and housing violations files were chosen to match that date. At a later check, the "Inspection Date" was replaced by ???Record Date??? as it preceded inspection and better matched "Created Date".
 
+## Data Merging Process
+### Creation of Data Views
+
+### Data Aggregation
+
+### Data Merge
+
 ## Initial analysis
 ### Restaurant calls and violations
 An initial question of interest for the analysis is: Is there a linear 
