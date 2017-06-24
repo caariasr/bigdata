@@ -27,7 +27,7 @@ library(base64enc)
 library(png)
 ```
 
-##introduction
+##Introduction
 
 ## Connect to database CADMS
 Here we connect to our database
@@ -55,9 +55,9 @@ head(allbyzipmonth)
 
 The first step of the data cleaning process was to move the tables from the msba.popbyzip2010, msba.nyc311calls2016, and msba.nycrestaurants, to cadms.popbyzip2010 on the big data server.
 
-The second step focused on cleaning the data under zip code in all three tables. Some of the zip codes had incorrect format, such as additional digits and symbols. The symbols were removed and the first five digits were extracted as 'true' zip codes. Subsequently the zip codes were converted to numbers.
+The second step focused on cleaning the data under zip code in all three tables. Some of the zip codes had incorrect formatting, such as additional digits and symbols. The symbols were removed and the first five digits were extracted as 'true' zip codes. Subsequently the zip codes were converted to numbers.
 
-The NYC 311 calls were restricted by location type of violation to include initially: restaurant, residential, family, and private house. However, further inspection into the 311 call files revealed that other types of location should be included, namely: apartment and residence. As for the restaurant violation files, the following were added for filtration: bars, clubs, bakery, deli, cafeteria, catering, food cart, and soup kitchen. The new approach is meant to broaden the selection process and hence improve the accuracy of the results.
+The NYC 311 calls were restricted by location type of violation to initially include: restaurant, residential, family, and private house. However, further inspection into the 311 call files revealed that other types of location should be included, namely, apartment and residence. As for the restaurant violation files, the following were added for filtration: bars, clubs, bakery, deli, cafeteria, catering, food cart, and soup kitchen. The new approach is meant to broaden the selection process and hence improve the accuracy of the results.
 
 The location type data had formatting issues such as: the same word written in lower and upper cases. Same location mentioned more than once in different formats and groups i.e. residential and residential/House. There are N/As and mixed used housing (residential and none). All these issues had to be identified and fixed by unifying the data. 
 
@@ -157,8 +157,7 @@ allbyzipmonth %>%
     scale_numeric("y", domain = c(0, 600), nice = FALSE)
 ```
 
-**Fast conclusions**: NO apparent linear relationship in one of the months or a group of them
-. The behavior in each month is similar to the overall result. October behaves differently from other months as well.
+**Initial conclusions:** The number of restaurant violations plotted against number of 311 calls per zipcode does not display a strong linear relationship  either in month or in aggregate. A separate view of the data by month does not deviate from this conclusion based on the aggregated months. One hypothesis that the group was testing was that environmental factors that motivate 311 calls may drive the number of restaurant violations but this does not appear to show within the data results. 
 
 
 ### Population and housing
@@ -178,7 +177,7 @@ allbyzipmonth %>%
     scale_numeric("y", domain = c(0, 3000), nice = T)
 ```
 
-**Initial conclusions** The number of housing calls (and separately violations) plotted against number of 311 calls per zip code shows some differences by months/seasons. Excluding October, which shows drastically different behavior than the other months and November and December which do not have any data, January-April tend to have  less concentrated data sets while May-September are more concentrated. There are many more zip codes with higher instances of housing calls and violations in the winter/spring - perhaps due to seasonality and corresponding utility effects . This relationship appears to have potential for further exploration.
+**Initial conclusions:** The number of housing calls (and separately violations) plotted against number of 311 calls per zip code shows some differences by months/seasons. Excluding October, which shows drastically different behavior than the other months and November and December which do not have any data, January-April tend to have  less concentrated data sets while May-September are more concentrated. There are many more zip codes with higher instances of housing calls and violations in the winter/spring - perhaps due to seasonality and corresponding utility effects . This relationship appears to have potential for further exploration.
 
 ### Population and restaurants
 ```{r popres, fig.height=5, fig.width=15, retina=1}
@@ -195,7 +194,7 @@ allbyzipmonth %>%
              properties=axis_props(title=list(dy=-50)))
 ```
 
-**Initial conclusions** Population and the number of restaurant calls shows the same banding of seasonality as in 'population and housing.' Winter/spring months tend to show looser groupings with higher maximums than do summer/fall months with a global observation of maximums decreasing after Population 60,000.
+**Initial conclusions:** Population and the number of restaurant calls shows the same banding of seasonality as in 'population and housing.' Winter/spring months tend to show looser groupings with higher maximums than do summer/fall months with a global observation of maximums decreasing after Population 60,000.
 
 Restaurant violations plotted against population do not show the same pattern but do also have some slight differences in the maximum values with the winter/spring months being higher, to a less drastic degree than the number of calls
 
@@ -212,9 +211,7 @@ head(allbyzip)
 ```
 
 ## Visualizations by zipcode only
-Since we found that the violations don't happen in the last two months (November had one math and December 0). We decided
-to create another joined table only by zipcode, we believe that a significant amount of calls was not being match just due
-to the fact of taking place in the last two months of the year.
+Since we found that the violations don’t occur in the last two months (November had one sum instance and December 0). We decided to create another joined table - only by zipcode because we believe that a significant amount of calls were not matching just because they occurred in the last two months of the year.
 
 ### Housing
 ```{r houseVis2, fig.height=5, fig.width=15, retina=1}
@@ -226,9 +223,7 @@ allbyzip %>%
              properties=axis_props(title=list(dy=-30)))
 ```
 
-**Fast conclusions:** There is a strong linear relationship as we saw on the previous analysis. Also there is
-heteroscedasticity (The bigger the number of calls, the bigger the variance). This is to be 
-expected since is count data.
+**Initial conclusions:** As with the truncated dataset from the earlier analysis, there is a strong linear relationship between the number of 311 calls by zipcode plotted against the number of housing violations. The effects of heteroscedasticity are present and expected because we are working with data of count type. 
 
 ### Restaurants
 ```{r resVis2, fig.height=5, fig.width=15, retina=1}
@@ -240,7 +235,7 @@ allbyzip %>%
              properties=axis_props(title=list(dy=-30)))
 ```
 
-**Fast conclusions:** There is a weak linear relationship as we saw in previous analysis.
+**Initial conclusions:** No change from the previous analysis - there is a very weak linear relationship between the number of 311 calls per zipcode and the number of restaurant violations.
 
 ### Population and housing
 ```{r housepopVis, fig.height=5, fig.width=15, retina=1}
@@ -255,9 +250,9 @@ allbyzip %>%
     scale_numeric("y", domain = c(0, 26000), nice = T)
 ```
 
-**Fast conclusions:** The violations have more dispersion than calls. There seems to be a relationship for both housing calls and violations with population (heteroscedasticity in count data is expected again).
+**Initial conclusions:** Similar to other visualizations by zipcode only, there was little change from earlier analysis. Housing violations vs population by zip code appear to have a more dispersed data set than housing calls vs. population by zip code and stay true to previous observations.
 
-#### Population and restaurants
+### Population and restaurants
 ```{r respopVis, fig.height=5, fig.width=15, retina=1}
 allbyzip %>% 
     ggvis(x=~population, y=input_select(c("restaurant_calls", "restaurant_violations"), 
@@ -270,7 +265,7 @@ allbyzip %>%
     scale_numeric("y", domain = c(0, 4500), nice = T)
 ```
 
-**Fast conclusions:** The violations have more dispersion than calls. There seems to be a relationship for both restaurant calls and violations with population (heteroscedasticity in count data is expected again). The difference in scale for restaurants is quite big (The range of the violations is from 0 to almost 4500, while in calls is from 0 to 800, maybe we are missing restaurant calls?)
+**Initial conclusions:** Restaurant calls and violations have a relationship with population, with restaurant violations being much more dispersed than calls. This may indicate a set of missing data or error in data transformation, as we do not expect to see such a stark difference in correlation between the two attributes. 
 
 ### Maps
 #### Housing violations
@@ -290,8 +285,7 @@ ggmap(map) + geom_point(
         scale_color_gradient(low="green", high="red")
 ```
 
-**Fast conclusions:** We can see that the critical areas in terms of housing violations 
-are the bronx and brooklyn? (Maybe add more specifics?). The ones with less violations are south of manhattan and queens (I think).
+**Initial conclusions:** The heatmap indicates that most housing violations occur in the Bronx, Harlem, and Brooklyn. In the next heatmap iteration, it may be useful to change the ranges of heatmap color indications to have better visibility of housing violations below 5,000.
 
 #### Restaurant violations
 ```{r resmaps, message=FALSE, message=FALSE}
@@ -303,18 +297,8 @@ ggmap(map) + geom_point(
         scale_color_gradient(low="green", high="red")
 ```
 
-**Fast conclusions:** The only critical area I see here is lower manhattan. 
+**Initial conclusions:** Lower Manhattan has the highest density of restaurant violations, followed distantly by portions of Brooklyn and Harlem.
 
 
-#### Population
-```{r popmaps, message=FALSE, message=FALSE}
-# get map
-map<-get_map(location='New York City',maptype = "terrain", source='google')
-ggmap(map) + geom_point(
-        aes(x=longitude, y=latitude, colour=population), 
-        data=allcoordzip, alpha=1, na.rm = T)  + 
-        scale_color_gradient(low="green", high="red")
-```
 
-**Fast conclusions:** Is this useful? I see that some highly populated areas match those with high numbers of housing violations (But we saw this in the previous analysis)
 
