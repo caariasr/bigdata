@@ -34,8 +34,6 @@ library(zipcode)
 
 ##Introduction
 
-
-
 ##Data Cleaning Process
 
 The first step of the data cleaning process was to create the team database in hive and to move the tables from the `msba` database into it.
