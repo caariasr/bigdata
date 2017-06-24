@@ -25,9 +25,54 @@ library(shiny)
 library(highr)
 library(base64enc)
 library(png)
+library(ggvis)
+library(plyr)
+library(dplyr)
+library(ggmap)
+library(zipcode)
 ```
 
 ##Introduction
+
+
+
+##Data Cleaning Process
+
+The first step of the data cleaning process was to create the team database in hive and to move the tables from the `msba` database into it.
+
+The second step focused on cleaning the data under zip code in all three tables. Some of the zip codes had incorrect formatting, such as additional digits and symbols. The symbols were removed and the first five digits were extracted as "true" zip codes. Subsequently the zip codes were converted to numbers and filtered to only include those in New York City.
+
+The NYC 311 calls were restricted by location type of violation to initially include: restaurant, residential, family, and private house. However, further inspection into the 311 call files revealed that other types of location should be included, namely, apartment and residence. As for the restaurant violation files, the following were added for filtration: bars, clubs, bakery, deli, cafeteria, catering, food cart, and soup kitchen. The new approach is meant to broaden the selection process and hence improve the accuracy of the results.
+
+The location type data had formatting issues such as: the same word written in lower and upper cases. Same location mentioned more than once in different formats and groups i.e. residential and residential/House. There are N/As and mixed used housing (residential and none). All these issues had to be identified and fixed by unifying the data. 
+
+Some columns were incorrectly labeled and therefore the columns were re-labeled based on the data it contained. This was observed in the following columns: `x_coordinate_state_plane`, `y_coordinate_state_plane`, `borough`, `longitude`, `latitude`, `location`, and `junk`.
+
+Some cities were mentioned multiple times as unique instances, in lower case and upper case. i.e. Astoria vs. ASTORIA. Some cities were described with more than one unique identifier i.e. BELLEROSE vs. BELLEROSE VILLAGE. Some cities were misspelled i.e. CEDARHURST vs. CEDERHURST. One field was missing data.
+
+The restaurant violations and housing violations files were restricted to year 2016 given that the NYC 311 callsi file covered only the year of 2016.
+
+`created_date` was selected as a variable from the NYC 311 calls and the `inspection_date` in both restaurant and housing violations files were chosen to match that date. At a later check, the "Inspection Date" was replaced by `record_date` as it preceded inspection and better matched "Created Date".
+
+The column `month` was created for all tables except population, by substrating the first two characters of the corresponding date column.
+
+## Data Merging Process
+
+### Creation of Data Views
+The initial step in the data merging process centered on the creation of multiple views of each database filtered and grouped by relevant variables. The relevant variables were determined using the knowledge gained from the data understanding and data cleaning processes. A total of four views were created during this step, they include:
+
+* View 1 labeled `restaurantcallsbyzipmonth` referenced the nyc311callscleaned database to filter `restaurant_calls` by `location_type` to include locations with strings that had the words "restaurant", "cafe", and "cafateria". Once this filter was applied to the `restaurant_calls`, the data was then grouped by zipcode and month.
+
+* View 2 labeled housingcallsbyzipmonth referenced the nyc311callscleaned database to filter `housing_calls` by `location_type` to include locations with strings that had the words "residential", "family", and "private house". Once this filter was applied to the `housing_calls`, the data was then grouped by zipcode and month.
+
+* View 3 labeled restaurantbyzipmonth referenced the nycrestaurantscleaned database to filter `restaurant_violations` by `iscritical` to include only the violations that are "critical". Once this filter was applied to the `restaurant_violations`, the data was then grouped by zipcode and month.
+
+* View 4 labeled `housingbyzipmonth` referenced the housingcleaned database to group by zipcode and month.
+
+### Data Aggregation and Merge
+Following the creation of the four views in the step above, the next step consisted of data aggregation. The data aggregation step included...(need to finish)
+
+## Initial analysis
 
 ## Connect to database CADMS
 Here we connect to our database
@@ -48,43 +93,6 @@ allbyzipmonth$month <- factor(allbyzipmonth$month, levels = month.name)
 head(allbyzipmonth)
 ```
 
-
-
-
-##Data Cleaning Process
-
-The first step of the data cleaning process was to move the tables from the msba.popbyzip2010, msba.nyc311calls2016, and msba.nycrestaurants, to cadms.popbyzip2010 on the big data server.
-
-The second step focused on cleaning the data under zip code in all three tables. Some of the zip codes had incorrect formatting, such as additional digits and symbols. The symbols were removed and the first five digits were extracted as 'true' zip codes. Subsequently the zip codes were converted to numbers.
-
-The NYC 311 calls were restricted by location type of violation to initially include: restaurant, residential, family, and private house. However, further inspection into the 311 call files revealed that other types of location should be included, namely, apartment and residence. As for the restaurant violation files, the following were added for filtration: bars, clubs, bakery, deli, cafeteria, catering, food cart, and soup kitchen. The new approach is meant to broaden the selection process and hence improve the accuracy of the results.
-
-The location type data had formatting issues such as: the same word written in lower and upper cases. Same location mentioned more than once in different formats and groups i.e. residential and residential/House. There are N/As and mixed used housing (residential and none). All these issues had to be identified and fixed by unifying the data. 
-
-Some columns were incorrectly labeled and therefore the columns were re-labeled based on the data it contained. This was observed in the following columns: x_coordinate_state_plane, y_coordinate_state_plane, borough, longitude, latitude, location, and junk.
-
-Some cities were mentioned multiple times as unique instances, in lower case and upper case. i.e. Astoria vs. ASTORIA. Some cities were described with more than one unique identifier i.e. BELLEROSE vs. BELLEROSE VILLAGE. Some cities were misspelled i.e. CEDARHURST vs. CEDERHURST. One field was missing data.
-
-The restaurant violations and housing violations files were restricted to year 2016 given that the NYC 311 calls??? file covered only the year of 2016.
-
-The "Created Date" was selected as a variable from the NYC 311 calls and the "Inspection Date" in both restaurant and housing violations files were chosen to match that date. At a later check, the "Inspection Date" was replaced by ???Record Date??? as it preceded inspection and better matched "Created Date".
-
-## Data Merging Process
-### Creation of Data Views
-The initial step in the data merging process centered on the creation of multiple views of each database filtered and grouped by relevant variables. The relevant variables were determined using the knowledge gained from the data Understanding and data cleaning processes. A total of four views were created during this step, they include:
-
-View 1 labeled restaurantcallsbyzipmonth referenced the nyc311callscleaned database to filter restaurant_calls by location_type to include locations with strings that had the words "restaurant", "cafe", and "cafateria". Once this filter was applied to the restaurant_calls, the data was then grouped by zipcode and month.
-
-View 2 labeled housingcallsbyzipmonth referenced the nyc311callscleaned database to filter housing_calls by location_type to include locations with strings that had the words "residentail", "family", and "private house". Once this filter was applied to the housing_calls, the data was then grouped by zipcode and month.
-
-View 3 labeled restaurantbyzipmonth referenced the nycrestaurantscleaned database to filter restaurant_violations by iscritical to include only the violations that are "critical". Once this filter was applied to the restaurant_violations, the data was then grouped by zipcode and month.
-
-View 4 labeled housingbyzipmonth referenced the housingcleaned database to group by zipcode and month.
-
-### Data Aggregation and Merge
-Following the creation of the four views in the step above, the next step consisted of data aggregation. The data aggregation step included...(need to finish)
-
-## Initial analysis
 ### Restaurant calls and violations
 An initial question of interest for the analysis is: Is there a linear 
 relation between the number of 311 calls for restaurants and the number of
@@ -125,8 +133,6 @@ and violations (`r round(cor(allbyzipmonth$population, allbyzipmonth$housing_vio
 ## Visualizations
 ### Housing
 ```{r houseVis, fig.height=5, fig.width=15, retina=1, message=FALSE}
-library(ggvis)
-library(dplyr)
 allbyzipmonth %>% 
     ggvis(x=~housing_calls, y=~housing_violations) %>%
     filter(allbyzipmonth$month %in% 
@@ -271,8 +277,6 @@ allbyzip %>%
 #### Housing violations
 
 ```{r housemaps, message=FALSE, message=FALSE}
-library(ggmap)
-library(zipcode)
 data("zipcode")
 names(zipcode)[1] <- "zipcode"
 allcoordzip <- merge(zipcode, allbyzip)
