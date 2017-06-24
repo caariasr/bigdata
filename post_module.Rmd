@@ -32,7 +32,6 @@ library(ggmap)
 library(zipcode)
 ```
 
-<<<<<<< HEAD
 ##Introduction
 
 
@@ -74,7 +73,6 @@ The initial step in the data merging process centered on the creation of multipl
 Following the creation of the four views in the step above, the next step consisted of data aggregation. The data aggregation step included...(need to finish)
 
 ## Initial analysis
-
 
 ## Connect to database CADMS
 Here we connect to our database
