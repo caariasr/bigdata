@@ -81,7 +81,8 @@ Here we connect to our database
 
 ```{r get views, message=FALSE}
 #allbyzipmonth <- dbGetQuery(conn, "select * from allbyzipmonth")
-#saveRDS(allbyzipmonth, file="allbyzipmonth.rds")
+#saveRDS(allbyzipmonth, file="data/allbyzipmonth.rds")
+#allbyzipmonth <- read.table("data/allbyzipmonth.txt", sep = "\t", header=T)
 allbyzipmonth <- readRDS("data/allbyzipmonth.rds")
 allbyzipmonth$month <- mapvalues(allbyzipmonth$month, 
                                  c(paste("0", 1:9, sep=''), "10", "11", "12"), month.name) 
@@ -207,8 +208,9 @@ Restaurant violations plotted against population do not show the same pattern bu
 We went back to hive and created aggregated views by zipcode only, we then merged by zipcode and
 loaded the view here.
 ```{r load data }
-#allbyzip <- dbGetQuery(conn, "select * from cadms.allbyzip")
-# saveRDS(allbyzip, file="allbyzip.rds")
+# allbyzip <- dbGetQuery(conn, "select * from cadms.allbyzip")
+# saveRDS(allbyzip, file="data/allbyzip.rds")
+# allbyzip <- read.table('data/allbyzip.txt', sep="\t", header=T)
 allbyzip <- readRDS("data/allbyzip.rds")
 head(allbyzip)
 ```
