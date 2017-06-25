@@ -43,12 +43,12 @@ create or replace view nyc311callscleaned as
 -- Restaurant violations for 2016 only and NYC zip codes
 create or replace view nycrestaurantscleaned as
     select substr(regexp_replace(zipcode, "[^\\d]", ""), 1, 5) as zipcode, dba as restaurant_name,
-    substr(record_date, 1, 2) as month,
+    substr(inspection_date, 1, 2) as month,
     lower(critical_flag) as iscritical, cuisine_description, grade, score, inspection_type
     from nycrestaurants
     where cast(substr(regexp_replace(zipcode, "[^\\d]", ""), 1, 5) as int) > 10000 and
           cast(substr(regexp_replace(zipcode, "[^\\d]", ""), 1, 5) as int) <= 11697 and
-          record_date rlike '2016$';
+          inspection_date rlike '2016$';
 
 -- Housing violations for 2016 and NYC zip codes
 create or replace view housingcleaned as

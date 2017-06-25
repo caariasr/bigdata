@@ -89,7 +89,8 @@ create or replace view housingbyzip as
 create or replace view allbyzip as
     select A.zipcode as zipcode, cast(A.population as int) as population,
     B.housing_violations as housing_violations, C.restaurant_violations as restaurant_violations,
-    D.restaurant_calls as restaurant_calls, E.housing_calls as housing_calls
+    D.restaurant_calls as restaurant_calls, E.housing_calls as housing_calls, 
+    F.restaurant_critical_violations as restaurant_critical_violations
     from nycpopbyzip as A
     INNER JOIN (select * from housingbyzip) as B on A.zipcode = B.zipcode
     INNER JOIN (select * from restaurantsbyzip) as C on B.zipcode = C.zipcode
