@@ -18,8 +18,7 @@ create table nycrestaurants as select * from msba.nycrestaurants;
 
 -- New york population 2010
 create or replace view nycpopbyzip as
-    select substr(regexp_replace(zipcode, "[^\\d]", ""), 1, 5) as zipcode, 
-    regexp_replace(population, "[^\\d]", "") as population
+    select substr(regexp_replace(zipcode, "[^\\d]", ""), 1, 5) as zipcode, population 
     from popbyzip2010
     where substr(regexp_replace(zipcode, "[^\\d]", ""), 1, 5) > 10000 and
         substr(regexp_replace(zipcode, "[^\\d]", ""), 1, 5) < 11697;
@@ -28,7 +27,7 @@ create or replace view nycpopbyzip as
 -- NYC 311 Calls cleaned and only (possible) relevant variables
 create or replace view nyc311callscleaned as
     select substr(regexp_replace(incident_zip, "[^\\d]", ""), 1, 5) as zipcode,
-    substr(created_date, 2, 2) as month, complaint_type, descriptor, 
+    substr(created_date, 1, 2) as month, complaint_type, descriptor, 
     lower(location_type) as location_type,
     lower(x_coordinate_state_plane) as borough, 
     y_coordinate_state_plane as x_coordinate_state_plane,
@@ -44,7 +43,7 @@ create or replace view nyc311callscleaned as
 -- Restaurant violations for 2016 only and NYC zip codes
 create or replace view nycrestaurantscleaned as
     select substr(regexp_replace(zipcode, "[^\\d]", ""), 1, 5) as zipcode, dba as restaurant_name,
-    substr(inspection_date, 2, 2) as month,
+    substr(inspection_date, 1, 2) as month,
     lower(critical_flag) as iscritical, cuisine_description, grade, score, inspection_type,
     inspection_date
     from nycrestaurants
@@ -55,7 +54,7 @@ create or replace view nycrestaurantscleaned as
 -- Housing violations for 2016 and NYC zip codes
 create or replace view housingcleaned as
     select  substr(regexp_replace(zip, "[^\\d]", ""), 1, 5) as zipcode, class, currentstatus,
-    substr(inspectiondate, 2, 2) as month
+    substr(inspectiondate, 1, 2) as month
     from housingviolations
     where cast(substr(regexp_replace(zip, "[^\\d]", ""), 1, 5) as int) > 10000 and
           cast(substr(regexp_replace(zip, "[^\\d]", ""), 1, 5) as int) <= 11697 and

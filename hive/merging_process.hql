@@ -24,7 +24,7 @@ create or replace view restaurantsbyzipmonth as
 create or replace view criticalsbyzipmonth as
     select count(*) as restaurant__critical_violations, zipcode, month
     from nycrestaurantscleaned
-    where iscritical = '"critical"'
+    where iscritical = "critical"
     group by zipcode, month;
 
 -- housingviolations
@@ -76,7 +76,7 @@ create or replace view restaurantsbyzip as
 create or replace view criticalsbyzip as
     select count(*) as restaurant_critical_violations, zipcode
     from nycrestaurantscleaned
-    where iscritical = '"critical"'
+    where iscritical = "critical"
     group by zipcode;
 
 -- housingviolations
