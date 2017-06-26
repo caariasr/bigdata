@@ -85,48 +85,11 @@ Here we connect to our database
 #allbyzipmonth <- read.table("data/allbyzipmonth.txt", sep = "\t", header=T)
 allbyzipmonth <- readRDS("data/allbyzipmonth.rds")
 allbyzipmonth$month <- mapvalues(allbyzipmonth$month, 
-                                 c(paste("0", 1:9, sep=''), "10", "11", "12"), month.name) 
+                                1:12, month.name) 
 
 allbyzipmonth$month <- factor(allbyzipmonth$month, levels = month.name)
 head(allbyzipmonth)
 ```
-
-### Restaurant calls and violations
-An initial question of interest for the analysis is: Is there a linear 
-relation between the number of 311 calls for restaurants and the number of
-violations per month per zip code?
-
-```{r correlations}
-cor(allbyzipmonth$restaurant_calls, allbyzipmonth$restaurant_violations)
-```
-The correlation between restaurant 311 calls and violations is `r round(cor(allbyzipmonth$restaurant_calls, allbyzipmonth$restaurant_violations), 2)`. It would be a good idea to go back to the location_type used to filter the 311 calls specific about restaurants and see if there were some missing categories that could be included as restaurants. Assuming there is no missing calls counted
-as 311 restaurant calls, we can conclude that there is not a strong linear relationship between restaurant 311 calls and violations. Nevertheless we can test the null hypothesis that the population's true linear relationship is zero:
-
-```{r test correlation}
-cor.test(allbyzipmonth$restaurant_calls, allbyzipmonth$restaurant_violations)
-```
-
-The p-value for the correlation test is less than 2.2e-16 so we reject the null hypothesis 
-that the true linear correlation between 311 calls and violations for restaurants is zero.
-
-### Housing calls and violations
-The same question applies to the relationship between housing calls and violations:
-```{r housing cor}
-cor(allbyzipmonth$housing_violations, allbyzipmonth$housing_calls)
-```
-The correlation is `r round(cor(allbyzipmonth$housing_violations, allbyzipmonth$housing_calls), 2)`. 
-In this case, there is a strong linear relationship between calls and violations for housing.
-
-### Correlation matrix
-
-```{r all cors}
-cor(allbyzipmonth[,c(2,4:7)])
-```
-
-Finally we produce a correlation matrix to look for any other linear relationship between our variables. We can see that the population has a linear relationship with the housing calls 
-(`r round(cor(allbyzipmonth$population, allbyzipmonth$housing_calls), 2)`)
-and violations (`r round(cor(allbyzipmonth$population, allbyzipmonth$housing_violations), 2)`).
-
 
 ## Visualizations
 ### Housing
@@ -140,7 +103,7 @@ allbyzipmonth %>%
     add_axis("x", title = "Number of 311 calls per zipcode") %>%
     add_axis("y", title = "Number of housing violations") %>%
     scale_numeric("x", domain = c(0, 4000), nice = FALSE) %>%
-    scale_numeric("y", domain = c(0, 4000), nice = FALSE)
+    scale_numeric("y", domain = c(0, 200), nice = FALSE)
 ```
 
 **Initial conclusions**: The number of housing violations plotted against the number of 311 calls per zipcode behaves in a significantly linear fashion by month and in aggregate; as one would expect, an increase in the number of calls relates to an increase in housing violations. 
@@ -217,6 +180,41 @@ head(allbyzip)
 
 ## Visualizations by zipcode only
 Since we found that the violations don’t occur in the last two months (November had one sum instance and December 0). We decided to create another joined table - only by zipcode because we believe that a significant amount of calls were not matching just because they occurred in the last two months of the year.
+
+### Restaurant calls and violations
+An initial question of interest for the analysis is: Is there a linear 
+relation between the number of 311 calls for restaurants and the number of
+violations per month per zip code?
+
+```{r correlations}
+cor(allbyzip$restaurant_calls, allbyzip$restaurant_violations)
+```
+The correlation between restaurant 311 calls and violations is `r round(cor(allbyzip$restaurant_calls, allbyzip$restaurant_violations), 2)`. It would be a good idea to go back to the location_type used to filter the 311 calls specific about restaurants and see if there were some missing categories that could be included as restaurants. Assuming there is no missing calls counted
+as 311 restaurant calls, we can conclude that there is not a strong linear relationship between restaurant 311 calls and violations. Nevertheless we can test the null hypothesis that the population's true linear relationship is zero:
+
+```{r test correlation}
+cor.test(allbyzip$restaurant_calls, allbyzip$restaurant_violations)
+```
+
+The p-value for the correlation test is less than 2.2e-16 so we reject the null hypothesis 
+that the true linear correlation between 311 calls and violations for restaurants is zero.
+
+### Housing calls and violations
+The same question applies to the relationship between housing calls and violations:
+```{r housing cor}
+cor(allbyzip$housing_violations, allbyzip$housing_calls)
+```
+The correlation is `r round(cor(allbyzip$housing_violations, allbyzip$housing_calls), 2)`. 
+In this case, there is a strong linear relationship between calls and violations for housing.
+
+### Correlation matrix
+
+```{r all cors}
+cor(allbyzip[, -1])
+```
+
+Finally we produce a correlation matrix to look for any other linear relationship between our variables. We can see that the population has a linear relationship with the housing calls 
+(`r round(cor(allbyzip$population, allbyzip$housing_calls), 2)`).
 
 ### Housing
 ```{r houseVis2, fig.height=5, fig.width=15, retina=1}
