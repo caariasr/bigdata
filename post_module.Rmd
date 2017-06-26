@@ -84,8 +84,7 @@ Here we connect to our database
 #saveRDS(allbyzipmonth, file="data/allbyzipmonth.rds")
 #allbyzipmonth <- read.table("data/allbyzipmonth.txt", sep = "\t", header=T)
 allbyzipmonth <- readRDS("data/allbyzipmonth.rds")
-allbyzipmonth$month <- mapvalues(allbyzipmonth$month, 
-                                1:12, month.name) 
+allbyzipmonth$month <- mapvalues(allbyzipmonth$month, 1:12, month.name) 
 
 allbyzipmonth$month <- factor(allbyzipmonth$month, levels = month.name)
 head(allbyzipmonth)
@@ -101,9 +100,10 @@ allbyzipmonth %>%
                                       selected = month.name, label = "Month"))) %>% 
     layer_points(fill = ~factor(month)) %>%
     add_axis("x", title = "Number of 311 calls per zipcode") %>%
-    add_axis("y", title = "Number of housing violations") %>%
+    add_axis("y", title = "Number of housing violations", 
+             properties=axis_props(title=list(dy=-50))) %>%
     scale_numeric("x", domain = c(0, 4000), nice = FALSE) %>%
-    scale_numeric("y", domain = c(0, 200), nice = FALSE)
+    scale_numeric("y", domain = c(0, 2000), nice = FALSE)
 ```
 
 **Initial conclusions**: The number of housing violations plotted against the number of 311 calls per zipcode behaves in a significantly linear fashion by month and in aggregate; as one would expect, an increase in the number of calls relates to an increase in housing violations. 
