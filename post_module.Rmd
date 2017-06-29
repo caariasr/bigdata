@@ -33,6 +33,9 @@ library(zipcode)
 ```
 
 ##Introduction
+**DRAFT**
+(Just a copy of thoughts I wrote down for the conclusion section at the bottom)
+The Big Data post module assignment provides an opportunity to learn how to interact with hive, how to understand and clean multiple databases, how to merge the disparate data into one database, and finally how to analyze the data to draw conclusions and make correlations. This R Markdown document depicts Team CADMS' efforts to take advantage of this learning opportunity by creating an interactive narrative of the step-by-step process followed since the post module period began. The initial steps inlcuded accessing, understanding, and cleaning the data, followed by filtering the data to merge it into a single analyzable database. The final step was to cunduct analysis and create visualizations to understand connections and correlations present in the data.
 
 ##Data Cleaning Process
 
@@ -302,6 +305,8 @@ ggmap(map) + geom_point(
 
 **Initial conclusions:** Lower Manhattan has the highest density of restaurant violations, followed distantly by portions of Brooklyn and Harlem.
 
-
-
+##Conclusion
+**DRAFT** 
+(need to wait for intro and final edits to the above before finalizing the conclusion, the below are just thoughts)
+The Big Data post module assignment provides an opportunity to learn how to interact with hive, how to understand and clean multiple databases, how to merge disparate data into one database, and finally how to analyze the data inorder to draw conclusions and make correlations. This R Markdown document depicts Team CADMS' efforts to take advantage of this learning opportunity by creating an interactive narrative of the step-by-step process followed since the post module period began. The initial steps inlcuded accessing, understanding, and cleaning the data, followed by filtering the data to merge it into a single analyzable database. The final step was to cunduct analysis and create visualizations to understand connections and correlations present in the data.
 
