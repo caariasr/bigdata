@@ -31,11 +31,55 @@ library(dplyr)
 library(ggmap)
 library(zipcode)
 ```
-
 ##Introduction
-**DRAFT**
-(Just a copy of thoughts I wrote down for the conclusion section at the bottom)
 The Big Data post module assignment provides an opportunity to learn how to interact with hive, how to understand and clean multiple databases, how to merge the disparate data into one database, and finally how to analyze the data to draw conclusions and make correlations. This R Markdown document depicts Team CADMS' efforts to take advantage of this learning opportunity by creating an interactive narrative of the step-by-step process followed since the post module period began. The initial steps inlcuded accessing, understanding, and cleaning the data, followed by filtering the data to merge it into a single analyzable database. The final step was to cunduct analysis and create visualizations to understand connections and correlations present in the data.
+
+In this report we will be analyzing data from the 311 Calls, restaurant violations, housing violaitons and the population by zipcode. The information is provided for New York city and for the year 2016. 
+
+All the files are allocated in the Stern big data cluster in the Hive MSBA databease. The files have the following names:
+
+| Description                             | Table Name        |
+| ----------------------------------------|:----------------- |
+|311 Calls for 2016                       |nyc311calls2016    |
+|Restaurant Violations (all years)        |nycrestaurants     |
+|Housing Violations (all years)           |housingviolations  |
+|Population by Zipcode (all US for 2010)  |popbyzip2010       |
+
+Throughout the document, the reader will find **in bold** dificulties we encounter during the process.
+
+##Hypotesis
+
+There are correlations between 311 calls, housing violations, restaurants and population in New York City
+
+##Procedure
+
+1. Data Understanding 
+2. Data Cleaning Process.
+3. Data Merging Process
+    +Creation of Data Views
+    +Data Aggregation and Merge
+4. Visualizations and Correlation analysis.
+5. Conclusions.
+
+
+
+##Data Understanding
+
+
+This initial step in this process is to understand the data. The data is divided into four separate data tables. Each data table must to be reviewed for data clarity and consistency. Below is the step-by-step approach for data understanding:
+
+  1. For every table we have built a data dictionary where we describe the follwing for each attribute.
+
+    + Data type
+    + Description
+    + Problems with the data
+    + Solutions to the problems with the data
+    + The type to which the variable should be converted.
+    
+    The data dictionary is located in the following [link.](https://docs.google.com/spreadsheets/d/1JmR_Ltpbqzho_SWPS-0K1CfEyaVPVwluhBMAzfY7sNM/edit?usp=sharing) **I need to know what the colors in the tables means... so I can clen the table**
+
+**Dificulties: The first issue was to find a way to confortably filter and overview the data in order find the singularities within each field, empty values, typos, incomplete values and incorrect formats. The way we solved this problem was to create tables and views where the values were unique. After using filters and sorting tools we could easily find all problematic values.**
+
 
 ##Data Cleaning Process
 
@@ -75,14 +119,14 @@ The initial step in the data merging process centered on the creation of multipl
 ### Data Aggregation and Merge
 Following the creation of the five views in the step above, the next step consisted of data aggregation. The data aggregation step included the creation of a new database labeled `allbyzipmonth` witch joined the five views created in the previous step with the nycpopbyzip database. The merge process joined each of the five views by zipcode and month. In addition to creating the `allbyzipmonth` database, a `allbyzip` database was also created using the same process detailed above. Both databases were used to conduct data analysis, witch will be described in the next section.
 
-## Initial analysis
+### Initial analysis
 
-## Connect to database CADMS
+### Connect to database CADMS
 Here we connect to our database
 ```{r connect, eval=FALSE}
 # conn = dbConnect(drv,"jdbc:hive2://bigdata.stern.nyu.edu:10000/cadms;auth=noSasl","","")
 ```
-## Bring the views into R for visualizations
+### Bring the views into R for visualizations
 
 ```{r get views, message=FALSE}
 #allbyzipmonth <- dbGetQuery(conn, "select * from allbyzipmonth")
