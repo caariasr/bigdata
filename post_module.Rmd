@@ -35,8 +35,7 @@ library(zipcode)
 
 The Big Data post module assignment provides an opportunity to learn how to interact with hive, how to understand and clean multiple databases, how to merge the disparate data into one database, and finally how to analyze the data to draw conclusions and make correlations. This R Markdown document depicts Team CADMS' efforts to take advantage of this learning opportunity by creating an interactive narrative of the step-by-step process followed since the post module period began. The initial steps included accessing, understanding, and cleaning the data, followed by filtering the data to merge it into a single analyzable database. The final step was to cunduct analysis and create visualizations to understand connections and correlations present in the data.
 
-In this report, we will be analyzing data from the 311 Calls, restaurant violations, housing violations and the population by zipcode. The information is provided for New York city and for the year 2016. 
-
+In this report, we will be analyzing data from the 311 Calls, restaurant violations, housing violations and the population by zip code. The information is provided for New York city, calls and violations for the year 2016 and population for the year 2010. 
 
 All the files are allocated in the Stern big data cluster in the Hive MSBA database. The files have the following names:
 
@@ -48,12 +47,14 @@ All the files are allocated in the Stern big data cluster in the Hive MSBA datab
 |Population by Zip code (all US for 2010)  |popbyzip2010       |
 
 
-Throughout the document, the reader will find **in bold** difficulties we encountered during the process.
+Throughout the document, the reader will find **in bold** the difficulties we encountered during the process.
 
 
 ##Hypothesis
 
-There are correlations between 311 calls, housing violations, restaurants and population in New York City
+* There are correlations between 311 calls, housing violations, restaurants and population in New York City
+
+* The behavior of calls and violations changes by month of the year.
 
 ##Procedure
 
@@ -67,10 +68,10 @@ There are correlations between 311 calls, housing violations, restaurants and po
 
 
 
-##Data Understanding
+## Data Understanding
 
 
-This initial step in this process is to understand every single field in all data base. The data is divided into four separate data tables. Each data table must to be reviewed for data clarity and consistency. Below is the step-by-step approach for data understanding:
+This initial step in this process is to understand every single field in the database. The data is divided into four separate data tables. Each data table must to be reviewed for data clarity and consistency. Below is the step-by-step approach for data understanding:
 
 
   1. For every table we built a data dictionary where we describe the following for each attribute.
@@ -84,11 +85,18 @@ This initial step in this process is to understand every single field in all dat
     
     The data dictionary is located in the following [link.](https://docs.google.com/spreadsheets/d/1JmR_Ltpbqzho_SWPS-0K1CfEyaVPVwluhBMAzfY7sNM/edit?usp=sharing)
 
-**Analyzing and Understanding the Files/Tables**
+**Talk about NYC OPEN DATA WEBSITE in general**
+
+### Analyzing and Understanding the Files/Tables
+
+#### Zip codes
+
+The zip code is our common variable accross all tables. The main issue with the zip codes was the format: some of them had only 4 digits, others had foreign characters like dash or thiks. Our attempt to solve this problem was to remove any non-numeric character from the zip code and select the first 5 elements. We are aware that this doesn't solve all the problems in the zip code variable (There are typos and other possible errors) but we decided it was enough to have a good match between all tables. Finally the zip codes were filtered in all tables to be between $10001$ and $11697$, which is the range that corresponds to New York City.
+
 
 Restaurant Violations (all years)  - nycrestaurants
 
-This files is composed of 19 attributes that describe the restaurant violations for the boroughs of Brookling, Bronx, Manhattan, Queens and Staten Island. The table contains all the attributes that identify each restaurant along with the details of the violations.
+This table is composed of 19 attributes that describe the restaurant violations for the boroughs of Brookling, Bronx, Manhattan, Queens and Staten Island. The table contains all the attributes that identify each restaurant along with the details of the violations.
 
 FINDINGS:
 
@@ -103,48 +111,55 @@ This file contains the the population for all the zip codes in the US for the ye
 
 FINDINGS:
 
-+ The main issue with the zip codes is that for some of them we only have 4 digits, when all zip codes must have 5 digits. The way to correct this was to simply add a "0" at the beginning of the record.
-
 + We only took into account the zip codes for the boroughs addressed by the other tables.
 
-+ For some records the population is '0'. The explanation is not that the records is wrong, it simply indicates that in that specific zip code there are no residencies.
++ For some records the population is 0. The explanation is not that the records is wrong, it simply indicates that in that specific zip code there are no residencies. Since we are looking at restaurant violations as well, we decided to keep the zip codes of population 0 in the cleaning process and will only remove them (and also any zip code with population less than 2000) in the visualization step.  
 
 
 Housing Violations (all years) - housingviolations
 
-This file contains the housing violation history for the boroughs of Brookling, Bronx, Manhattan, Queens and Staten Island. The records clearly states when the inspection was made, the address of the place and the description of the violation followed by the current status. It is worth to mention that this file has most of the records with consistent information, and we did not find issues while processing the information. 
+This file contains the housing violation history for the boroughs of Brookling, Bronx, Manhattan, Queens and Staten Island. The records clearly state when the inspection was made, the address of the place and the description of the violation followed by the current status. It is worth to mention that this file has most of the records with consistent information, and we did not find issues while processing the information. 
 
 
 311 Calls for 2016 - NYC311calls2016
 
-This file contains all the 311 calls received in NYC for the year 2016. The zip code that this table provides is not for the location of the call but the location of the incident. this becomes important when we will be analyzing the correlation among all four tables. Some of the records show that there was in fact no incident or that it was not possible to perform the inspection. However, we are going to keep these records since our interest in to find the relation to the fact that there was a call in place. 
+This file contains all the 311 calls received in NYC for the year 2016. The zip code that this table provides is not for the location of the call but the location of the incident. this becomes important for analyzing the correlation among all four tables. Some of the records show that there was in fact no incident or that it was not possible to perform the inspection. However, we are going to keep these records since our interest is not only in calls but also violations for each zip code. 
 
 FINDINGS:
 
 + Among all files, this is the only one that provides the geo location of the reported incident. 
 
-+ The detail for each incident is more than what we need in our analysis, so we are going to discard most of the fields that cant be correlated with the other files. This will make this table lighter and easier to analyze.
++ The detail for each incident is more than what we need in our analysis, so we are going to discard most of the fields that can't be correlated with the other files. This will make this table lighter and easier to analyze.
+
++ ** TALK ABOUT HOW WE SPLITTED THIS TABLE INTO HOUSING CALLS AND RESTAURANT CALLS AND THE ROLE THE NYC OPEN DATA WEBSITE PLAYED HERE**
 
 **External tables added to the analysis**
 
-At this point we realized that we wanted to also include visualization with maps where we could place all kinds of violations. In order to use such tools we needed to find a way to find the geo location for all zip codes to be analyzed. The only file that provided such information was the 311, so we needed to add a table with the geo location for all other zip codes. We used the package "zipcode", and we called it using the command > data("zipcode")
+At this point we realized that we wanted to also include visualization with maps where we could place all kinds of violations. In order to use such tools we needed to find a method to plot observations based on zip codes, for all zip codes to be analyzed. Even though the table nyc311calls2016 provided geo location of the calls, there was no way of matching such locations to any of the other tables, therefore we needed another more general way of plotting all this information in a map. A simple and fast approach to this is to use the latitude and longitud of the center point of each zip code. This data was already available for all US zip codes in the R package called "zipcode", and we called it using the command`data("zipcode")`.
 
 
 
-**Difficulties: The first issue was to find a way to comfortably filter and overview the data in order find the singularities within each field, empty values, typos, incomplete values and incorrect formats. The way we solved this problem was to create tables and views where the values were unique. After using filters and sorting tools we could easily find all problematic values.**
+**Difficulties**: 
 
+* Our first difficulty was finding a better way to clean the zip codes. We believe that it was better to clean each zip code using the same cleaning method before doing the merge than to leave some of the zip codes uncleaned in the hopes that once merged they would not be used. We tried different approaches and decided to use regular expressions to remove any non-numerical character and the to select the first 5 (or less if that maximum was lower than 5) numeric characters. 
+
+* We explored the possibility of bringing additional variables for analysis, but some of them had meny categories. In terms of the merging process this would be difficult in the sense that each category would be represented as a separated row in order to be able to be merged. Not only that but also the total number of zip codes would be reduced (all zip codes with no information on those variables will not show in the final table). 
+
+* Another issue was to find a way to comfortably filter and overview the data in order find the singularities within each field, empty values, typos, incomplete values and incorrect formats. The way we solved this problem was to create tables and views where the values were unique. After using filters and sorting tools we could easily find all problematic values.
+
+**More difficulties need to be added**
 
 ##Data Cleaning Process
 
 The first step of the data cleaning process was to create the team database in hive and to move the tables from the `msba` database into it.
 
-The second step focused on cleaning the data under zip code in all three tables. Some of the zip codes had incorrect formatting, such as additional digits and symbols. The symbols were removed and the first five digits were extracted as "true" zip codes. Subsequently the zip codes were converted to numbers and filtered to only include those in New York City.
+The second step focused on cleaning the data under zip code in all three tables. Some of the zip codes had incorrect formatting, such as additional digits and symbols. The symbols were removed and the first five digits were extracted as "true" zip codes. Subsequently the zip codes were converted to numbers and filtered to only include those in New York City (Between 10001 and 11697). 
 
 The NYC 311 calls were restricted by location type of violation to initially include: restaurant, residential, family, and private house. However, further inspection into the 311 call files revealed that other types of location should be included, namely, apartment and residence. As for the restaurant violation files, the following were added for filtration: bars, clubs, bakery, deli, cafeteria, catering, food cart, and soup kitchen. The new approach is meant to broaden the selection process and hence improve the accuracy of the results.
 
 The location type data had formatting issues such as: the same word written in lower and upper cases. Same location mentioned more than once in different formats and groups i.e. residential and residential/House. There are N/As and mixed used housing (residential and none). All these issues had to be identified and fixed by unifying the data. 
 
-Some columns were incorrectly labeled and therefore the columns were re-labeled based on the data it contained. This was observed in the following columns: `x_coordinate_state_plane`, `y_coordinate_state_plane`, `borough`, `longitude`, `latitude`, `location`, and `junk`.
+Some columns were incorrectly labeled and therefore the columns were re-labeled based on the data it contained. This was observed in the following columns: `x_coordinate_state_plane`, `y_coordinate_state_plane`, `borough`, `longitude`, `latitude`, `location`, and `junk`. The details can be found in the hive code in appendix A.
 
 Some cities were mentioned multiple times as unique instances, in lower case and upper case. i.e. Astoria vs. ASTORIA. Some cities were described with more than one unique identifier i.e. BELLEROSE vs. BELLEROSE VILLAGE. Some cities were misspelled i.e. CEDARHURST vs. CEDERHURST. One field was missing data.
 
@@ -156,21 +171,45 @@ The column `month` was created for all tables except population, by substrating 
 
 ## Data Merging Process
 
-### Creation of Data Views
-The initial step in the data merging process centered on the creation of multiple views of each database filtered and grouped by relevant variables. The relevant variables were determined using the knowledge gained from the data understanding and data cleaning processes. A total of five views were created during this step, they include:
+The initial step in the data merging process centered on the creation of multiple views of each database filtered and grouped by relevant variables. The relevant variables were determined using the knowledge gained from the data understanding and data cleaning processes. A total of 10 views were created during this step (4 for merging by zip code and month, 4 for merging by zip code only).
 
-* View 1 labeled `restaurantcallsbyzipmonth` referenced the nyc311callscleaned database to filter `restaurant_calls` by `location_type` to include locations with strings that had the words "restaurant", "soup", "catering", "food", and "cafeteria". Once this filter was applied to the `restaurant_calls`, the data was then grouped by zipcode and month.
+### Merging by zip code and month
 
-* View 2 labeled `housingcallsbyzipmonth` referenced the nyc311callscleaned database to filter `housing_calls` by `location_type` to include locations with strings that had the words "residential", "family", "private house", "apartment", and "residence". Once this filter was applied to the `housing_calls`, the data was then grouped by zipcode and month.
+We first decided to explore if there were any differences in each month in terms of calls and violations. To accomplish this we created 4 views of data aggregated by zip code and month as follows:
 
-* View 3 labeled `criticalsbyzipmonth` referenced the nycrestaurantscleaned database to filter `restaurant_critical_violations` by `iscritical` to include only the violations that are "critical". Once this filter was applied to the `restaurant_critical_violations`, the data was then grouped by zipcode and month.
+#### Creation Of Aggregated Data Views
 
-* View 4 labeled `restaurantsbyzipmonth` referenced the nycrestaurantscleaned database to group by zipcode and month.
+* View 1 labeled `restaurantcallsbyzipmonth` referenced the nyc311callscleaned database to filter by `location_type` where it contained the words "restaurant", "soup", "catering", "food", and "cafeteria". The data was then grouped by zip code and month. The resulting variable is called `restaurant_calls` and is defined as the number of 311 calls related to restaurants for each zip code and month of the year 2016.
 
-* View 5 labeled `housingbyzipmonth` referenced the housingcleaned database to group by zipcode and month.
+* View 2 labeled `housingcallsbyzipmonth` referenced the nyc311callscleaned database to filter by `location_type` where it contained the words "residential", "family", "private house", "apartment", and "residence". The data was then grouped by zip code and month. The resulting variable is called `housing_calls` and is defined as the number of 311 calls related to housing for each zip code and month of the year 2016.
 
-### Data Aggregation and Merge
-Following the creation of the five views in the step above, the next step consisted of data aggregation. The data aggregation step included the creation of a new database labeled `allbyzipmonth` which joined the five views created in the previous step with the nycpopbyzip database. The merge process joined each of the five views by zipcode and month. In addition to creating the `allbyzipmonth` database, a `allbyzip` database was also created using the same process detailed above. Both databases were used to conduct data analysis, which will be described in the next section.
+* View 3 labeled `restaurantsbyzipmonth` referenced the nycrestaurantscleaned database to group by zip code and month. The resulting variable is called `restaurant_violations` and is defined as the number of inspections that resulted in violations related to restaurants for each zip code and month of the year 2016.
+
+* View 4 labeled `housingbyzipmonth` referenced the housingcleaned database to group by zip code and month. The resulting variable is called `housing_violations` and is defined as the number of inspections that resulted in violations related to housing for each zip code and month of the year 2016.
+
+#### Data Merging Step
+
+Following the creation of the four views in the step above, the next step consisted of merging the views. The data merging step included the creation of a new database labeled `allbyzipmonth` which joined the four views created in the previous step with the population of New York City created in the cleaning step (`nycpopbyzip`). The merge process joined each of the four views by zip code and month. The population was duplicated in all months for the same zipcode (But this didn't represent a roblem for our objective).
+
+### Merging by zip code only
+
+After visualizing the data by month we decided to explore the overall behavior of housing calls, violations and population for the whole 2016 year. We followed a similar process to the data grouped by zip code an month and is presented as follows:
+
+#### Creation Of Aggregated Data Views
+
+
+* View 1 labeled `restaurantcallsbyzip` referenced the nyc311callscleaned database to filter by `location_type` where it contained the words "restaurant", "soup", "catering", "food", and "cafeteria". The data was then grouped by zip code. The resulting variable is called `restaurant_calls` and is defined as the number of 311 calls related to restaurants for each zip code in the year 2016.
+
+* View 2 labeled `housingcallsbyzip` referenced the nyc311callscleaned database to filter by `location_type` where it contained the words "residential", "family", "private house", "apartment", and "residence". The data was then grouped by zip code. The resulting variable is called `housing_calls` and is defined as the number of 311 calls related to housing for each zip code in the year 2016.
+
+* View 3 labeled `restaurantsbyzip` referenced the nycrestaurantscleaned database to group by zip code. The resulting variable is called `restaurant_violations` and is defined as the number of inspections that resulted in violations related to restaurants for each zip code in the year 2016.
+
+* View 4 labeled `housingbyzip` referenced the housingcleaned database to group by zip code. The resulting variable is called `housing_violations` and is defined as the number of inspections that resulted in violations related to housing for each zip code in the year 2016.
+
+#### Data Merging Step
+
+Following the creation of the four views in the step above, the next step consisted of merging the views. The data merging step included the creation of a new database labeled `allbyzip` which joined the four views created in the previous step with the population of New York City created in the cleaning step (`nycpopbyzip`). The merge process joined each of the four views by zip code.
+
 
 ### Initial analysis
 
@@ -201,16 +240,16 @@ allbyzipmonth %>%
              eval(input_checkboxgroup(choices=month.name, 
                                       selected = month.name, label = "Month"))) %>% 
     layer_points(fill = ~factor(month)) %>%
-    add_axis("x", title = "Number of 311 calls per zipcode") %>%
+    add_axis("x", title = "Number of 311 calls per zip code") %>%
     add_axis("y", title = "Number of housing violations", 
              properties=axis_props(title=list(dy=-50))) %>%
     scale_numeric("x", domain = c(0, 4000), nice = FALSE) %>%
     scale_numeric("y", domain = c(0, 2000), nice = FALSE)
 ```
 
-**Initial conclusions**: The number of housing violations plotted against the number of 311 calls per zipcode behaves in a significantly linear fashion by month and in aggregate; as one would expect, an increase in the number of calls relates to an increase in housing violations. 
+**Initial conclusions**: The number of housing violations plotted against the number of 311 calls per zip code behaves in a significantly linear fashion by month and in aggregate; as one would expect, an increase in the number of calls relates to an increase in housing violations. 
 
-November and December do not have any reliable data points which could indicate that the city performs annual inspections or no inspections during this time, in lieu of inspections in response to 311 calls. October has consistently curious behavior over the course of this analysis in that it yields a low number of housing violations and a low number of 311 calls - this may be an error in the analysis process or a systemic factor of which the team does not have an understanding. 
+November and December do not have any reliable data points which could indicate that the city performs annual inspections or no inspections during this time, in lieu of inspections in response to 311 calls.Another reason could be that the calls were only recorded till the beginning of November. Nevertheless,October has consistently curious behavior over the course of this analysis in that it yields a low number of housing violations and a low number of 311 calls - this may be an error in the analysis process or a systemic factor of which the team does not have an understanding. 
 
 ### Restaurants
 ```{r resVis, fig.height=5, fig.width=15, retina=1}
@@ -220,13 +259,13 @@ allbyzipmonth %>%
              eval(input_checkboxgroup(choices=month.name, 
                                       selected = month.name, label = "Month"))) %>% 
     layer_points(fill = ~month) %>%
-    add_axis("x", title = "Number of 311 calls per zipcode") %>%
+    add_axis("x", title = "Number of 311 calls per zip code") %>%
     add_axis("y", title = "Number of restaurant violations") %>%
     scale_numeric("x", domain = c(0, 200), nice = FALSE) %>%
     scale_numeric("y", domain = c(0, 600), nice = FALSE)
 ```
 
-**Initial conclusions:** The number of restaurant violations plotted against number of 311 calls per zipcode does not display a strong linear relationship  either in month or in aggregate. A separate view of the data by month does not deviate from this conclusion based on the aggregated months. One hypothesis that the group was testing was that environmental factors that motivate 311 calls may drive the number of restaurant violations but this does not appear to show within the data results. 
+**Initial conclusions:** The number of restaurant violations plotted against number of 311 calls per zip code does not display a strong linear relationship  either in month or in aggregate. A separate view of the data by month does not deviate from this conclusion based on the aggregated months. One hypothesis that the group was testing was that environmental factors that motivate 311 calls may drive the number of restaurant violations but this does not appear to show within the data results. 
 
 
 ### Population and housing
@@ -268,9 +307,9 @@ allbyzipmonth %>%
 Restaurant violations plotted against population do not show the same pattern but do also have some slight differences in the maximum values with the winter/spring months being higher, to a less drastic degree than the number of calls
 
 
-### Analysis by zipcode only
+### Analysis by zip code only
 
-We went back to hive and created aggregated views by zipcode only, we then merged by zipcode and
+We went back to hive and created aggregated views by zip code only, we then merged by zip code and
 loaded the view here.
 ```{r load data }
 # allbyzip <- dbGetQuery(conn, "select * from cadms.allbyzip")
@@ -280,8 +319,8 @@ allbyzip <- readRDS("data/allbyzip.rds")
 head(allbyzip)
 ```
 
-## Visualizations by zipcode only
-Since we found that the violations don’t occur in the last two months (November had one sum instance and December 0). We decided to create another joined table - only by zipcode because we believe that a significant amount of calls were not matching just because they occurred in the last two months of the year.
+## Visualizations by zip code only
+Since we found that the violations don’t occur in the last two months (November had one sum instance and December 0). We decided to create another joined table - only by zip code because we believe that a significant amount of calls were not matching just because they occurred in the last two months of the year.
 
 ### Restaurant calls and violations
 An initial question of interest for the analysis is: Is there a linear 
@@ -323,24 +362,24 @@ Finally we produce a correlation matrix to look for any other linear relationshi
 allbyzip %>% 
     ggvis(x=~housing_calls, y=~housing_violations) %>%
     layer_points() %>%
-    add_axis("x", title = "Number of 311 calls per zipcode") %>%
+    add_axis("x", title = "Number of 311 calls per zip code") %>%
     add_axis("y", title = "Number of housing violations",
              properties=axis_props(title=list(dy=-30)))
 ```
 
-**Initial conclusions:** As with the truncated dataset from the earlier analysis, there is a strong linear relationship between the number of 311 calls by zipcode plotted against the number of housing violations. The effects of heteroscedasticity are present and expected because we are working with data of count type. 
+**Initial conclusions:** As with the truncated dataset from the earlier analysis, there is a strong linear relationship between the number of 311 calls by zip code plotted against the number of housing violations. The effects of heteroscedasticity are present and expected because we are working with data of count type. 
 
 ### Restaurants
 ```{r resVis2, fig.height=5, fig.width=15, retina=1}
 allbyzip %>% 
     ggvis(x=~restaurant_calls, y=~restaurant_violations) %>%
     layer_points() %>%
-    add_axis("x", title = "Number of 311 calls per zipcode") %>%
+    add_axis("x", title = "Number of 311 calls per zip code") %>%
     add_axis("y", title = "Number of restaurant violations", 
              properties=axis_props(title=list(dy=-30)))
 ```
 
-**Initial conclusions:** No change from the previous analysis - there is a very weak linear relationship between the number of 311 calls per zipcode and the number of restaurant violations.
+**Initial conclusions:** No change from the previous analysis - there is a very weak linear relationship between the number of 311 calls per zip code and the number of restaurant violations.
 
 ### Population and housing
 ```{r housepopVis, fig.height=5, fig.width=15, retina=1}
@@ -355,7 +394,7 @@ allbyzip %>%
     scale_numeric("y", domain = c(0, 26000), nice = T)
 ```
 
-**Initial conclusions:** Similar to other visualizations by zipcode only, there was little change from earlier analysis. Housing violations vs population by zip code appear to have a more dispersed data set than housing calls vs. population by zip code and stay true to previous observations.
+**Initial conclusions:** Similar to other visualizations by zip code only, there was little change from earlier analysis. Housing violations vs population by zip code appear to have a more dispersed data set than housing calls vs. population by zip code and stay true to previous observations.
 
 ### Population and restaurants
 ```{r respopVis, fig.height=5, fig.width=15, retina=1}
