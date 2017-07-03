@@ -9,11 +9,12 @@ output:
     keep_md: yes
     theme: readable
     toc: yes
+    css: "width.css"
 runtime: shiny
 resource_files:
 - bigdata.Rproj
 ---
-
+<link href="test.css" rel="stylesheet">
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 # source('/gridapps/hive/HIVERJARS/connect2hive.R')
@@ -30,6 +31,9 @@ library(plyr)
 library(dplyr)
 library(ggmap)
 library(zipcode)
+library(ggplot2)
+library(ggthemes)
+colfunc <- colorRampPalette(c("blue", "gray"))
 ```
 ##Introduction
 
@@ -214,7 +218,8 @@ Following the creation of the four views in the step above, the next step consis
 ### Initial analysis
 
 ### Connect to database CADMS
-Here we connect to our database
+Here we connect to our database (Is commented cause it takes considerable time to load). After
+the first time we load it into R, we moved it to a local `rds` file.
 ```{r connect, eval=FALSE}
 # conn = dbConnect(drv,"jdbc:hive2://bigdata.stern.nyu.edu:10000/cadms;auth=noSasl","","")
 ```
@@ -233,18 +238,43 @@ head(allbyzipmonth)
 
 ## Visualizations
 ### Housing
-```{r houseVis, fig.height=5, fig.width=15, retina=1, message=FALSE}
-allbyzipmonth %>% 
-    ggvis(x=~housing_calls, y=~housing_violations) %>%
-    filter(allbyzipmonth$month %in% 
-             eval(input_checkboxgroup(choices=month.name, 
-                                      selected = month.name, label = "Month"))) %>% 
-    layer_points(fill = ~factor(month)) %>%
-    add_axis("x", title = "Number of 311 calls per zip code") %>%
-    add_axis("y", title = "Number of housing violations", 
-             properties=axis_props(title=list(dy=-50))) %>%
-    scale_numeric("x", domain = c(0, 4000), nice = FALSE) %>%
-    scale_numeric("y", domain = c(0, 2000), nice = FALSE)
+```{r houseBox1, fig.height=5, fig.width=15, retina=1, message=FALSE}
+fluidRow(
+  column(3,
+         selectInput("variable", "Select Calls/Violations",
+                     c("housing_calls", "housing_violations")))
+)
+renderPlot({
+  var <- input$variable
+  ylab <- ifelse(var == "housing_calls", "Number of 311 calls related to housing", "Number of housing violations")
+  data <- allbyzipmonth[!(allbyzipmonth$month %in% c("November", "December")), ]
+  data$month <- factor(data$month, levels=month.name[1:10])
+  
+  ggplot(data, aes(x=month, y=data[, var])) +
+    labs(x="Month of the year", y=ylab) + 
+    geom_boxplot(aes(fill=month)) +
+    theme_tufte()
+})
+```
+
+**Initial conclusions**: Looks like in october the number of calls decreases but the number of violations increases. Please expand on this by adding interpretation of the result. 
+
+```{r houseVis1, fig.height=5, fig.width=15, retina=1, message=FALSE}
+fluidRow(
+  column(3,
+         sliderInput("month", "Select month range", min=1, max=12, value=c(1,12)))
+)
+renderPlot({
+  monthsSelected <- month.name[input$month[1]:input$month[2]]
+  allbyzipmonth %>%
+      filter(month %in% monthsSelected) %>%
+      ggplot(aes(x=housing_calls, y=housing_violations)) +
+      labs(x="Number of 311 calls related to housing", y="Number of housing violations") + 
+      geom_point(aes(color=month)) +
+      scale_x_continuous(limits = c(0, 3200)) +
+      scale_y_continuous(limits = c(0, 2000)) +
+      theme_tufte()
+})
 ```
 
 **Initial conclusions**: The number of housing violations plotted against the number of 311 calls per zip code behaves in a significantly linear fashion by month and in aggregate; as one would expect, an increase in the number of calls relates to an increase in housing violations. 
@@ -252,17 +282,43 @@ allbyzipmonth %>%
 November and December do not have any reliable data points which could indicate that the city performs annual inspections or no inspections during this time, in lieu of inspections in response to 311 calls.Another reason could be that the calls were only recorded till the beginning of November. Nevertheless,October has consistently curious behavior over the course of this analysis in that it yields a low number of housing violations and a low number of 311 calls - this may be an error in the analysis process or a systemic factor of which the team does not have an understanding. 
 
 ### Restaurants
+```{r resBox1, fig.height=5, fig.width=15, retina=1, message=FALSE}
+fluidRow(
+  column(3,
+         selectInput("variable2", "Select Calls/Violations",
+                     c("restaurant_calls", "restaurant_violations")))
+)
+renderPlot({
+  var <- input$variable2
+  ylab <- ifelse(var == "restaurant_calls", "Number of 311 calls related to restaurants", "Number of restaurant violations")
+  data <- allbyzipmonth[!(allbyzipmonth$month %in% c("November", "December")), ]
+  data$month <- factor(data$month, levels=month.name[1:10])
+  
+  ggplot(data, aes(x=month, y=data[, var])) +
+    labs(x="Month of the year", y=ylab) + 
+    geom_boxplot(aes(fill=month)) +
+    theme_tufte()
+})
+```
+
+**Initial conclusions:** Same problem with calls. What else?
+
 ```{r resVis, fig.height=5, fig.width=15, retina=1}
-allbyzipmonth %>% 
-    ggvis(x=~restaurant_calls, y=~restaurant_violations) %>%
-    filter(allbyzipmonth$month %in% 
-             eval(input_checkboxgroup(choices=month.name, 
-                                      selected = month.name, label = "Month"))) %>% 
-    layer_points(fill = ~month) %>%
-    add_axis("x", title = "Number of 311 calls per zip code") %>%
-    add_axis("y", title = "Number of restaurant violations") %>%
-    scale_numeric("x", domain = c(0, 200), nice = FALSE) %>%
-    scale_numeric("y", domain = c(0, 600), nice = FALSE)
+fluidRow(
+  column(3,
+         sliderInput("month2", "Select month range", min=1, max=12, value=c(1,12)))
+)
+renderPlot({
+  monthsSelected <- month.name[input$month2[1]:input$month2[2]]
+  allbyzipmonth %>%
+      filter(month %in% monthsSelected) %>%
+      ggplot(aes(x=restaurant_calls, y=restaurant_violations)) +
+      labs(x="Number of 311 calls related to restaurants", y="Number of restaurant violations") + 
+      geom_point(aes(color=month)) +
+      scale_x_continuous(limits = c(0, 200)) +
+      scale_y_continuous(limits = c(0, 600)) +
+      theme_tufte()
+})
 ```
 
 **Initial conclusions:** The number of restaurant violations plotted against number of 311 calls per zip code does not display a strong linear relationship  either in month or in aggregate. A separate view of the data by month does not deviate from this conclusion based on the aggregated months. One hypothesis that the group was testing was that environmental factors that motivate 311 calls may drive the number of restaurant violations but this does not appear to show within the data results. 
@@ -270,36 +326,55 @@ allbyzipmonth %>%
 
 ### Population and housing
 ```{r pophous, fig.height=5, fig.width=15, retina=1}
-allbyzipmonth %>% 
-    ggvis(x=~population, y=input_select(c("housing_calls", "housing_violations"), 
-                                         label="Choose calls or violations",  
-                                         map = as.name)) %>%
-    filter(allbyzipmonth$month %in% 
-             eval(input_checkboxgroup(choices=month.name, 
-                                      selected = month.name, label = "Month"))) %>% 
-    layer_points(fill = ~month) %>%
-    add_axis("x", title = "Population", properties=axis_props(title=list(dy=-50))) %>%
-    add_axis("y", title = "Number of housing calls/violations", 
-             properties=axis_props(title=list(dy=-50))) %>%
-    scale_numeric("x", domain = c(0, 110000), nice = T) %>%
-    scale_numeric("y", domain = c(0, 3000), nice = T)
+fluidRow(
+  column(3,
+         sliderInput("month3", "Select month range", min=1, max=12, value=c(1,12))),
+  column(3,
+         selectInput("variable3", "Select calls or violations", 
+                     c("housing_calls", "housing_violations")))
+)
+renderPlot({
+  var <- input$variable3
+  ylab <- ifelse(var == "housing_calls", "Number of 311 calls related to  housing", 
+                 "Number of housing violations")
+  monthsSelected <- month.name[input$month3[1]:input$month3[2]]
+  allbyzipmonth %>%
+      filter(month %in% monthsSelected & population > 2000) %>%
+      ggplot(aes(x=population, y=allbyzipmonth[, var])) +
+      labs(x="Population in 2010", y=ylab) + 
+      geom_point(aes(color=month)) +
+      scale_x_continuous(limits = c(0, 110000)) +
+      scale_y_continuous(limits = c(0, 3500)) +
+      theme_tufte()
+})
 ```
 
 **Initial conclusions:** The number of housing calls (and separately violations) plotted against number of 311 calls per zip code shows some differences by months/seasons. Excluding October, which shows drastically different behavior than the other months and November and December which do not have any data, January-April tend to have  less concentrated data sets while May-September are more concentrated. There are many more zip codes with higher instances of housing calls and violations in the winter/spring - perhaps due to seasonality and corresponding utility effects . This relationship appears to have potential for further exploration.
 
 ### Population and restaurants
 ```{r popres, fig.height=5, fig.width=15, retina=1}
-allbyzipmonth %>% 
-    ggvis(x=~population, y=input_select(c("restaurant_calls", "restaurant_violations"), 
-                                         label="Choose calls or violations",  
-                                         map = as.name)) %>%
-    filter(allbyzipmonth$month %in% 
-             eval(input_checkboxgroup(choices=month.name, 
-                                      selected = month.name, label = "Month"))) %>% 
-    layer_points(fill = ~month) %>%
-    add_axis("x", title = "Population", properties=axis_props(title=list(dy=-50))) %>%
-    add_axis("y", title = "Number of restaurant calls/violations", 
-             properties=axis_props(title=list(dy=-50)))
+fluidRow(
+  column(3,
+         sliderInput("month4", "Select month range", min=1, max=12, value=c(1,12))),
+  column(3,
+         selectInput("variable4", "Select calls or violations", 
+                     c("restaurant_calls", "restaurant_violations")))
+)
+renderPlot({
+  var <- input$variable4
+  ylab <- ifelse(var == "restaurant_calls", "Number of 311 calls related to restaurant", 
+                 "Number of restaurant violations")
+  monthsSelected <- month.name[input$month4[1]:input$month4[2]]
+  ylim <- ifelse(var == "restaurant_calls", 210, 600)
+  allbyzipmonth %>%
+      filter(month %in% monthsSelected & population > 2000) %>%
+      ggplot(aes(x=population, y=allbyzipmonth[, var])) +
+      labs(x="Population in 2010", y=ylab) + 
+      geom_point(aes(color=month)) +
+      scale_x_continuous(limits = c(0, 110000)) +
+      scale_y_continuous(limits = c(0, ylim)) +
+      theme_tufte()
+})
 ```
 
 **Initial conclusions:** Population and the number of restaurant calls shows the same banding of seasonality as in 'population and housing.' Winter/spring months tend to show looser groupings with higher maximums than do summer/fall months with a global observation of maximums decreasing after Population 60,000.
@@ -360,11 +435,12 @@ Finally we produce a correlation matrix to look for any other linear relationshi
 ### Housing
 ```{r houseVis2, fig.height=5, fig.width=15, retina=1}
 allbyzip %>% 
-    ggvis(x=~housing_calls, y=~housing_violations) %>%
-    layer_points() %>%
-    add_axis("x", title = "Number of 311 calls per zip code") %>%
-    add_axis("y", title = "Number of housing violations",
-             properties=axis_props(title=list(dy=-30)))
+    ggplot(aes(x=housing_calls, y=housing_violations)) +
+    geom_point() +
+    geom_smooth(method='loess') +
+    labs(x="Number of 311 calls related to housing per zip code", 
+         y="Number of housing violations per zip code") + 
+    theme_tufte()
 ```
 
 **Initial conclusions:** As with the truncated dataset from the earlier analysis, there is a strong linear relationship between the number of 311 calls by zip code plotted against the number of housing violations. The effects of heteroscedasticity are present and expected because we are working with data of count type. 
@@ -372,74 +448,102 @@ allbyzip %>%
 ### Restaurants
 ```{r resVis2, fig.height=5, fig.width=15, retina=1}
 allbyzip %>% 
-    ggvis(x=~restaurant_calls, y=~restaurant_violations) %>%
-    layer_points() %>%
-    add_axis("x", title = "Number of 311 calls per zip code") %>%
-    add_axis("y", title = "Number of restaurant violations", 
-             properties=axis_props(title=list(dy=-30)))
+    ggplot(aes(x=restaurant_calls, y=restaurant_violations)) +
+    geom_point() +
+    geom_smooth(method='loess') +
+    labs(x="Number of 311 calls related to restaurants per zip code", 
+         y="Number of restaurant violations per zip code") + 
+    theme_tufte()
 ```
 
 **Initial conclusions:** No change from the previous analysis - there is a very weak linear relationship between the number of 311 calls per zip code and the number of restaurant violations.
 
 ### Population and housing
 ```{r housepopVis, fig.height=5, fig.width=15, retina=1}
-allbyzip %>% 
-    ggvis(x=~population, y=input_select(c("housing_calls", "housing_violations"), 
-                                         label="Choose calls or violations",  
-                                         map = as.name)) %>%
-    layer_points() %>%
-    add_axis("x", title = "Population") %>%
-    add_axis("y", title = "Calls/Violations", properties=axis_props(title=list(dy=-30))) %>%
-    scale_numeric("x", domain = c(0, 110000), nice = T) %>%
-    scale_numeric("y", domain = c(0, 26000), nice = T)
+fluidRow(
+  column(3, 
+         selectInput("variable5", "Select calls or violations",
+                     c("housing_calls", "housing_violations")))
+  )
+
+renderPlot({
+    var= input$variable5
+    ylab <- ifelse(var == "housing_calls", "Number of 311 calls related to housing",
+                   "Number of housing violations")
+    allbyzip %>% 
+    ggplot(aes(x=restaurant_calls, y=allbyzip[, var])) +
+    geom_point() +
+    labs(x="Population in 2010", 
+         y=ylab) + 
+    theme_tufte()
+})
 ```
 
 **Initial conclusions:** Similar to other visualizations by zip code only, there was little change from earlier analysis. Housing violations vs population by zip code appear to have a more dispersed data set than housing calls vs. population by zip code and stay true to previous observations.
 
 ### Population and restaurants
 ```{r respopVis, fig.height=5, fig.width=15, retina=1}
-allbyzip %>% 
-    ggvis(x=~population, y=input_select(c("restaurant_calls", "restaurant_violations"), 
-                                         label="Choose calls or violations",  
-                                         map = as.name)) %>%
-    layer_points() %>%
-    add_axis("x", title = "Population") %>%
-    add_axis("y", title = "Calls/Violations", properties=axis_props(title=list(dy=-30))) %>%
-    scale_numeric("x", domain = c(0, 110000), nice = T) %>%
-    scale_numeric("y", domain = c(0, 4500), nice = T)
+fluidRow(
+  column(3, 
+         selectInput("variable5", "Select calls or violations",
+                     c("restaurant_calls", "restaurant_violations")))
+  )
+
+renderPlot({
+    var= input$variable5
+    ylab <- ifelse(var == "restaurant_calls", "Number of 311 calls related to restaurants",
+                   "Number of restaurant violations")
+    allbyzip %>% 
+    ggplot(aes(x=restaurant_calls, y=allbyzip[, var])) +
+    geom_point() +
+    labs(x="Population in 2010", 
+         y=ylab) + 
+    theme_tufte()
+})
 ```
 
 **Initial conclusions:** Restaurant calls and violations have a relationship with population, with restaurant violations being much more dispersed than calls. This may indicate a set of missing data or error in data transformation, as we do not expect to see such a stark difference in correlation between the two attributes. 
 
 ### Maps
-#### Housing violations
+#### Housing
 
-```{r housemaps, message=FALSE, message=FALSE}
+```{r housemaps, message=FALSE, fig.show='hold', fig.align='center'}
 data("zipcode")
 names(zipcode)[1] <- "zipcode"
 allcoordzip <- merge(zipcode, allbyzip)
 rm(zipcode)
 # get map
 map<-get_map(location='New York City',maptype = "terrain", source='google')
+op <- par(mfrow=c(1,2)) 
 ggmap(map) + geom_point(
         aes(x=longitude, y=latitude, colour=housing_violations), 
+        data=allcoordzip, alpha=1, na.rm = T)  + 
+        scale_color_gradient(low="green", high="red")
+ggmap(map) + geom_point(
+        aes(x=longitude, y=latitude, colour=housing_calls), 
         data=allcoordzip, alpha=1, na.rm = T)  + 
         scale_color_gradient(low="green", high="red")
 ```
 
 **Initial conclusions:** The heatmap indicates that most housing violations occur in the Bronx, Harlem, and Brooklyn. In the next heatmap iteration, it may be useful to change the ranges of heatmap color indications to have better visibility of housing violations below 5,000.
 
-#### Restaurant violations
-```{r resmaps, message=FALSE, message=FALSE}
+#### Restaurants
+```{r resmaps, message=FALSE, fig.show='hold', fig.align='center'}
 # get map
+op <- par(mfrow=c(1,2)) 
 map<-get_map(location='New York City',maptype = "terrain", source='google')
 ggmap(map) + geom_point(
         aes(x=longitude, y=latitude, colour=restaurant_violations), 
         data=allcoordzip, alpha=1, na.rm = T)  + 
         scale_color_gradient(low="green", high="red")
+ggmap(map) + geom_point(
+        aes(x=longitude, y=latitude, colour=restaurant_calls), 
+        data=allcoordzip, alpha=1, na.rm = T)  + 
+        scale_color_gradient(low="green", high="red")
 ```
 
 **Initial conclusions:** Lower Manhattan has the highest density of restaurant violations, followed distantly by portions of Brooklyn and Harlem.
+
 
 ##Conclusion
 **DRAFT** 
