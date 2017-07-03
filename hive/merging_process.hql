@@ -20,13 +20,6 @@ create or replace view restaurantsbyzipmonth as
     from nycrestaurantscleaned
     group by zipcode, month;
 
--- critical restaurant violations
-create or replace view criticalsbyzipmonth as
-    select count(*) as restaurant__critical_violations, zipcode, month
-    from nycrestaurantscleaned
-    where iscritical = "critical"
-    group by zipcode, month;
-
 -- housingviolations
 create or replace view housingbyzipmonth as
     select count(*) as housing_violations, zipcode, month
@@ -46,9 +39,7 @@ create or replace view allbyzipmonth as
     INNER JOIN (select * from housingbyzipmonth) as B on A.zipcode = B.zipcode
     INNER JOIN (select * from restaurantsbyzipmonth) as C on B.zipcode = C.zipcode and B.month = C.month
     INNER JOIN (select * from restaurantcallsbyzipmonth) as D on D.zipcode = C.zipcode and D.month = C.month
-    INNER JOIN (select * from housingcallsbyzipmonth) as E on E.zipcode = D.zipcode and E.month = D.month
-    INNER JOIN (select * from criticalsbyzipmonth) as F on F.zipcode = E.zipcode and F.month = E.month;
-
+    INNER JOIN (select * from housingcallsbyzipmonth) as E on E.zipcode = D.zipcode and E.month = D.month;
 
 -- SECOND STAGE (ONLY BY ZIPCODE)
 -- reataurant calls
@@ -72,13 +63,6 @@ create or replace view restaurantsbyzip as
     from nycrestaurantscleaned
     group by zipcode;
 
--- critical restaurant violations
-create or replace view criticalsbyzip as
-    select count(*) as restaurant_critical_violations, zipcode
-    from nycrestaurantscleaned
-    where iscritical = "critical"
-    group by zipcode;
-
 -- housingviolations
 create or replace view housingbyzip as
     select count(*) as housing_violations, zipcode
@@ -95,5 +79,4 @@ create or replace view allbyzip as
     INNER JOIN (select * from housingbyzip) as B on A.zipcode = B.zipcode
     INNER JOIN (select * from restaurantsbyzip) as C on B.zipcode = C.zipcode
     INNER JOIN (select * from restaurantcallsbyzip) as D on D.zipcode = C.zipcode
-    INNER JOIN (select * from housingcallsbyzip) as E on E.zipcode = D.zipcode
-    INNER JOIN (select * from criticalsbyzip) as F on F.zipcode = E.zipcode;
+    INNER JOIN (select * from housingcallsbyzip) as E on E.zipcode = D.zipcode;
