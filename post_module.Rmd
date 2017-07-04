@@ -337,10 +337,11 @@ renderPlot({
   var <- input$variable3
   ylab <- ifelse(var == "housing_calls", "Number of 311 calls related to  housing", 
                  "Number of housing violations")
-  monthsSelected <- month.name[input$month3[1]:input$month3[2]]
+  ranged <- seq(input$month3[1], input$month3[2], by=1)
+  monthsSelected <- month.name[ranged]
   allbyzipmonth %>%
       filter(month %in% monthsSelected & population > 2000) %>%
-      ggplot(aes(x=population, y=allbyzipmonth[, var])) +
+      ggplot(aes_string(x="population", y=var)) +
       labs(x="Population in 2010", y=ylab) + 
       geom_point(aes(color=month)) +
       scale_x_continuous(limits = c(0, 110000)) +
@@ -364,11 +365,12 @@ renderPlot({
   var <- input$variable4
   ylab <- ifelse(var == "restaurant_calls", "Number of 311 calls related to restaurant", 
                  "Number of restaurant violations")
-  monthsSelected <- month.name[input$month4[1]:input$month4[2]]
+  ranged <- seq(input$month4[1], input$month4[2], by=1)
+  monthsSelected <- month.name[ranged]
   ylim <- ifelse(var == "restaurant_calls", 210, 600)
   allbyzipmonth %>%
       filter(month %in% monthsSelected & population > 2000) %>%
-      ggplot(aes(x=population, y=allbyzipmonth[, var])) +
+      ggplot(aes_string(x="population", y=var)) +
       labs(x="Population in 2010", y=ylab) + 
       geom_point(aes(color=month)) +
       scale_x_continuous(limits = c(0, 110000)) +
