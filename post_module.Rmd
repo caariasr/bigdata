@@ -487,12 +487,12 @@ renderPlot({
 ```{r respopVis, fig.height=5, fig.width=15, retina=1}
 fluidRow(
   column(3, 
-         selectInput("variable5", "Select calls or violations",
+         selectInput("variable6", "Select calls or violations",
                      c("restaurant_calls", "restaurant_violations")))
   )
 
 renderPlot({
-    var= input$variable5
+    var= input$variable6
     ylab <- ifelse(var == "restaurant_calls", "Number of 311 calls related to restaurants",
                    "Number of restaurant violations")
     allbyzip %>% 
