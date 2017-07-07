@@ -473,7 +473,7 @@ renderPlot({
     ylab <- ifelse(var == "housing_calls", "Number of 311 calls related to housing",
                    "Number of housing violations")
     allbyzip %>% 
-    ggplot(aes(x=restaurant_calls, y=allbyzip[, var])) +
+    ggplot(aes(x=population, y=allbyzip[, var])) +
     geom_point() +
     labs(x="Population in 2010", 
          y=ylab) + 
@@ -496,7 +496,7 @@ renderPlot({
     ylab <- ifelse(var == "restaurant_calls", "Number of 311 calls related to restaurants",
                    "Number of restaurant violations")
     allbyzip %>% 
-    ggplot(aes(x=restaurant_calls, y=allbyzip[, var])) +
+    ggplot(aes(x=population, y=allbyzip[, var])) +
     geom_point() +
     labs(x="Population in 2010", 
          y=ylab) + 
