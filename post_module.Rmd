@@ -89,7 +89,6 @@ This initial step in this process is to understand every single field in the dat
     
     The data dictionary is located in the following [link.](https://docs.google.com/spreadsheets/d/1JmR_Ltpbqzho_SWPS-0K1CfEyaVPVwluhBMAzfY7sNM/edit?usp=sharing)
 
-**Talk about NYC OPEN DATA WEBSITE in general**
 
 ### Analyzing and Understanding the Files/Tables
 
@@ -98,7 +97,7 @@ This initial step in this process is to understand every single field in the dat
 The zip code is our common variable accross all tables. The main issue with the zip codes was the format: some of them had only 4 digits, others had foreign characters like dash or thiks. Our attempt to solve this problem was to remove any non-numeric character from the zip code and select the first 5 elements. We are aware that this doesn't solve all the problems in the zip code variable (There are typos and other possible errors) but we decided it was enough to have a good match between all tables. Finally the zip codes were filtered in all tables to be between $10001$ and $11697$, which is the range that corresponds to New York City.
 
 
-Restaurant Violations (all years)  - nycrestaurants
+#### Restaurant Violations (all years)  - nycrestaurants
 
 This table is composed of 19 attributes that describe the restaurant violations for the boroughs of Brookling, Bronx, Manhattan, Queens and Staten Island. The table contains all the attributes that identify each restaurant along with the details of the violations.
 
@@ -109,7 +108,7 @@ FINDINGS:
 + 209 records do not have information in the following fields: dba (name of the restaurant), cuisine_description, inspection_date, action, violation_code, violation_description, critical_flag, score, grade, grade_date, and inspection_type. These records were deleted.
 
 
-Population by Zip code (all US for 2010) - popbyzip2010
+#### Population by Zip code (all US for 2010) - popbyzip2010
 
 This file contains the the population for all the zip codes in the US for the year 2010. Even though the analysis is for the year 2016, the population of the year 2010 is a close proxy.
 
@@ -120,12 +119,12 @@ FINDINGS:
 + For some records the population is 0. The explanation is not that the records is wrong, it simply indicates that in that specific zip code there are no residencies. Since we are looking at restaurant violations as well, we decided to keep the zip codes of population 0 in the cleaning process and will only remove them (and also any zip code with population less than 2000) in the visualization step.  
 
 
-Housing Violations (all years) - housingviolations
+#### Housing Violations (all years) - housingviolations
 
 This file contains the housing violation history for the boroughs of Brookling, Bronx, Manhattan, Queens and Staten Island. The records clearly state when the inspection was made, the address of the place and the description of the violation followed by the current status. It is worth to mention that this file has most of the records with consistent information, and we did not find issues while processing the information. 
 
 
-311 Calls for 2016 - NYC311calls2016
+#### 311 Calls for 2016 - NYC311calls2016
 
 This file contains all the 311 calls received in NYC for the year 2016. The zip code that this table provides is not for the location of the call but the location of the incident. this becomes important for analyzing the correlation among all four tables. Some of the records show that there was in fact no incident or that it was not possible to perform the inspection. However, we are going to keep these records since our interest is not only in calls but also violations for each zip code. 
 
@@ -135,9 +134,8 @@ FINDINGS:
 
 + The detail for each incident is more than what we need in our analysis, so we are going to discard most of the fields that can't be correlated with the other files. This will make this table lighter and easier to analyze.
 
-+ ** TALK ABOUT HOW WE SPLITTED THIS TABLE INTO HOUSING CALLS AND RESTAURANT CALLS AND THE ROLE THE NYC OPEN DATA WEBSITE PLAYED HERE**
++ ** TALK ABOUT HOW WE SPLITTED THIS TABLE INTO HOUSING CALLS AND RESTAURANT CALLS AND THE ROLE THE NYC OPEN DATA WEBSITE PLAYED HERE... AND ALSO TO MENTION THE EXTERNAL TABLES ADDED TO THE ANALYSIS**
 
-**External tables added to the analysis**
 
 At this point we realized that we wanted to also include visualization with maps where we could place all kinds of violations. In order to use such tools we needed to find a method to plot observations based on zip codes, for all zip codes to be analyzed. Even though the table nyc311calls2016 provided geo location of the calls, there was no way of matching such locations to any of the other tables, therefore we needed another more general way of plotting all this information in a map. A simple and fast approach to this is to use the latitude and longitud of the center point of each zip code. This data was already available for all US zip codes in the R package called "zipcode", and we called it using the command`data("zipcode")`.
 
@@ -145,13 +143,18 @@ At this point we realized that we wanted to also include visualization with maps
 
 **Difficulties**: 
 
-* Our first difficulty was finding a better way to clean the zip codes. We believe that it was better to clean each zip code using the same cleaning method before doing the merge than to leave some of the zip codes uncleaned in the hopes that once merged they would not be used. We tried different approaches and decided to use regular expressions to remove any non-numerical character and the to select the first 5 (or less if that maximum was lower than 5) numeric characters. 
+* Our first difficulty was finding a better way to clean the zip codes. We believe that it was better to clean each zip code before doing the merge than to leave some of the zip codes uncleaned hopping those with problems were not going to be used. We tried different approaches and decided to use regular expressions to remove any non-numerical character and then select the first five (or less if that maximum was lower than five) numeric characters. 
 
-* We explored the possibility of bringing additional variables for analysis, but some of them had meny categories. In terms of the merging process this would be difficult in the sense that each category would be represented as a separated row in order to be able to be merged. Not only that but also the total number of zip codes would be reduced (all zip codes with no information on those variables will not show in the final table). 
+* We explored the possibility of bringing additional variables for analysis, but some of them had many categories. In terms of the merging process this would complicate the process in the sense that each category would be represented as a separated row in order to be able to be merged. Besides, the total number of zip codes would be reduced (all zip codes with no information on those variables will not show in the final table). 
 
 * Another issue was to find a way to comfortably filter and overview the data in order find the singularities within each field, empty values, typos, incomplete values and incorrect formats. The way we solved this problem was to create tables and views where the values were unique. After using filters and sorting tools we could easily find all problematic values.
 
-**More difficulties need to be added**
+* There were complications at multiple times when trying to connect to Hive in the Big Data Instances. We believe that the reason was high traffic due to several other students trying to access as well. However, this is a hypothesis difficult to validate. In addition, the large amount of logs that were created eventually filled the quota of space assigned to us in the server in part because at the begging we were not working efficiently due to the lack of knowledge. This also represented a problem when trying to install several R packages needed for the visualizations. The solution was to contact the administrator of the cluster (Professor White), and we asked him to install the packages for us and making them accessible to other students.
+
+* While building the data dictionary, we had trouble understanding the meaning of some of the variables so we had to visit the [NYC OpenData website] (https://opendata.cityofnewyork.us/). **Salma... can you help me writing a little bit more about this**
+
+
+
 
 ##Data Cleaning Process
 
@@ -551,4 +554,180 @@ ggmap(map) + geom_point(
 **DRAFT** 
 (need to wait for intro and final edits to the above before finalizing the conclusion, the below are just thoughts)
 The Big Data post module assignment provides an opportunity to learn how to interact with hive, how to understand and clean multiple databases, how to merge disparate data into one database, and finally how to analyze the data in order to draw conclusions and make correlations. This R Markdown document depicts Team CADMS' efforts to take advantage of this learning opportunity by creating an interactive narrative of the step-by-step process followed since the post module period began. The initial steps included accessing, understanding, and cleaning the data, followed by filtering the data to merge it into a single analyzable database. The final step was to conduct analysis and create visualizations to understand connections and correlations present in the data.
+
+
+##APPENDIX
+
+
+###Data Dictionary
+
+Here is the link to data dictionaty is here
+
+[**CLICK HERE**](https://docs.google.com/spreadsheets/d/1JmR_Ltpbqzho_SWPS-0K1CfEyaVPVwluhBMAzfY7sNM/edit?usp=sharing)
+
+
+###Cleaning Process SQL Code
+
+This is the SQL code we used to clean the data.
+
+```sql
+-- Code to move tables to our own database
+use cadms;
+
+-- Move popbyzip2010 to cadms database
+create table popbyzip2010 as select * from msba.popbyzip2010;
+
+-- Move nyc311calls2016 to cadms database
+create table nyc311calls2016 as select * from msba.nyc311calls2016;
+
+-- Move housingviolations to cadms database
+create table housingviolations as select * from msba.housingviolations;
+
+-- Move nycrestaurants to cadms database
+create table nycrestaurants as select * from msba.nycrestaurants;
+
+
+-- Cleaned tables
+
+-- New york population 2010
+create or replace view nycpopbyzip as
+    select substr(regexp_replace(zipcode, "[^\\d]", ""), 1, 5) as zipcode, population 
+    from popbyzip2010
+    where substr(regexp_replace(zipcode, "[^\\d]", ""), 1, 5) > 10000 and
+        substr(regexp_replace(zipcode, "[^\\d]", ""), 1, 5) < 11697;
+
+
+-- NYC 311 Calls cleaned and only (possible) relevant variables
+create or replace view nyc311callscleaned as
+    select substr(regexp_replace(incident_zip, "[^\\d]", ""), 1, 5) as zipcode,
+    substr(created_date, 1, 2) as month, complaint_type, descriptor, 
+    lower(location_type) as location_type,
+    lower(x_coordinate_state_plane) as borough, 
+    y_coordinate_state_plane as x_coordinate_state_plane,
+    park_facility_name as y_coordinate_state_plane,
+    location as longitude, longitude as latitude
+    from nyc311calls2016
+    where cast(substr(regexp_replace(incident_zip, "[^\\d]", ""), 1, 5) as int) > 10000 and 
+    cast(substr(regexp_replace(incident_zip, "[^\\d]", ""), 1, 5) as int) <= 11697 and 
+        lower(location_type) regexp '(.*soup.*|.*catering.*|.*food.*|.*cafeteria.*|.*restaurant.*|.*residential.*|.*family.*|private house|.*apartment.*|.*residence.*)'
+        and lower(location_type) not in ('building (non-residential)');
+
+
+-- Restaurant violations for 2016 only and NYC zip codes
+create or replace view nycrestaurantscleaned as
+    select substr(regexp_replace(zipcode, "[^\\d]", ""), 1, 5) as zipcode, dba as restaurant_name,
+    substr(inspection_date, 1, 2) as month,
+    lower(critical_flag) as iscritical, cuisine_description, grade, score, inspection_type,
+    inspection_date
+    from nycrestaurants
+    where cast(substr(regexp_replace(zipcode, "[^\\d]", ""), 1, 5) as int) > 10000 and
+          cast(substr(regexp_replace(zipcode, "[^\\d]", ""), 1, 5) as int) <= 11697 and
+          inspection_date rlike '.*2016.*';
+
+-- Housing violations for 2016 and NYC zip codes
+create or replace view housingcleaned as
+    select  substr(regexp_replace(zip, "[^\\d]", ""), 1, 5) as zipcode, class, currentstatus,
+    substr(inspectiondate, 1, 2) as month
+    from housingviolations
+    where cast(substr(regexp_replace(zip, "[^\\d]", ""), 1, 5) as int) > 10000 and
+          cast(substr(regexp_replace(zip, "[^\\d]", ""), 1, 5) as int) <= 11697 and
+          inspectiondate rlike '.*2016.*';
+
+
+
+
+```
+
+###Dada Merging Process SQL Code
+
+This is the SQL code we used to merge the data.
+
+```sql
+-- Aggregation experiments 
+
+-- Restaurant calls
+create or replace view restaurantcallsbyzipmonth as
+    select count(*) as restaurant_calls, zipcode, month  
+    from nyc311callscleaned
+    where location_type regexp '(.*restaurant.*|.*soup.*|.*catering.*|.*food.*|.*cafeteria.*)'
+    group by zipcode, month;
+    
+-- Housing calls 
+create or replace view housingcallsbyzipmonth as
+    select count(*) as housing_calls, zipcode, month
+    from nyc311callscleaned
+    where location_type regexp '(.*residential.*|.*family.*|private house|.*apartment.*|.*residence.*)' 
+    group by zipcode, month;
+
+-- nycrestaurants
+create or replace view restaurantsbyzipmonth as
+    select count(*) as restaurant_violations, zipcode, month
+    from nycrestaurantscleaned
+    group by zipcode, month;
+
+-- housingviolations
+create or replace view housingbyzipmonth as
+    select count(*) as housing_violations, zipcode, month
+    from housingcleaned
+    group by zipcode, month;   
+    
+-- MERGE SECTION
+
+-- First master file merged (I can add any other filtered views here to get number of
+-- calls or violation by some filter variable like critical violations)
+
+create or replace view allbyzipmonth as
+    select A.zipcode as zipcode, cast(A.population as int) as population, B.month as month, 
+    B.housing_violations as housing_violations, C.restaurant_violations as restaurant_violations,
+    D.restaurant_calls as restaurant_calls, E.housing_calls as housing_calls
+    from nycpopbyzip as A
+    INNER JOIN (select * from housingbyzipmonth) as B on A.zipcode = B.zipcode
+    INNER JOIN (select * from restaurantsbyzipmonth) as C on B.zipcode = C.zipcode and B.month = C.month
+    INNER JOIN (select * from restaurantcallsbyzipmonth) as D on D.zipcode = C.zipcode and D.month = C.month
+    INNER JOIN (select * from housingcallsbyzipmonth) as E on E.zipcode = D.zipcode and E.month = D.month;
+
+-- SECOND STAGE (ONLY BY ZIPCODE)
+-- reataurant calls
+create or replace view restaurantcallsbyzip as
+    select count(*) as restaurant_calls, zipcode  
+    from nyc311callscleaned
+    where location_type regexp '(.*restaurant.*|.*soup.*|.*catering.*|.*food.*|.*cafeteria.*)'
+    group by zipcode;
+    
+-- housing calls
+create or replace view housingcallsbyzip as
+    select count(*) as housing_calls, zipcode
+    from nyc311callscleaned
+    where location_type regexp '(.*residential.*|.*family.*|private house|.*apartment.*|.*residence.*)' 
+    group by zipcode;
+
+
+-- nycrestaurants
+create or replace view restaurantsbyzip as
+    select count(*) as restaurant_violations, zipcode
+    from nycrestaurantscleaned
+    group by zipcode;
+
+-- housingviolations
+create or replace view housingbyzip as
+    select count(*) as housing_violations, zipcode
+    from housingcleaned
+    group by zipcode;
+        
+-- MERGE SECTION
+create or replace view allbyzip as
+    select A.zipcode as zipcode, cast(A.population as int) as population,
+    B.housing_violations as housing_violations, C.restaurant_violations as restaurant_violations,
+    D.restaurant_calls as restaurant_calls, E.housing_calls as housing_calls
+    from nycpopbyzip as A
+    INNER JOIN (select * from housingbyzip) as B on A.zipcode = B.zipcode
+    INNER JOIN (select * from restaurantsbyzip) as C on B.zipcode = C.zipcode
+    INNER JOIN (select * from restaurantcallsbyzip) as D on D.zipcode = C.zipcode
+    INNER JOIN (select * from housingcallsbyzip) as E on E.zipcode = D.zipcode;
+
+
+
+```
+
+
 
