@@ -38,7 +38,7 @@ colfunc <- colorRampPalette(c("blue", "gray"))
 
 ##Introduction
 
-The Big Data post-module assignment provides an opportunity to learn how to interact with hive, how to understand and clean multiple databases, how to merge the disparate data into one database, and finally how to analyze the data to draw conclusions and make correlations. This R Markdown document depicts Team CADMS' efforts to take advantage of this learning opportunity by creating an interactive narrative of the step-by-step process followed since the post-module period began. The initial steps included accessing, understanding, and cleaning the data, followed by filtering the data to merge it into a single analyzable database. The final step was to cunduct analysis and create visualizations to understand connections and correlations present in the data.
+The Big Data post-module assignment provides an opportunity to learn how to interact with hive, how to understand and clean multiple databases, how to merge the disparate data into one database, and finally how to analyze the data to draw conclusions and make correlations. This R Markdown document depicts Team CADMS' efforts to take advantage of this learning opportunity by creating an interactive narrative of the step-by-step process followed since the post-module period began. The initial steps included accessing, understanding, and cleaning the data, followed by filtering the data to merge it into a single analyzable database. The final step was to conduct analysis and create visualizations to understand connections and correlations present in the data.
 
 This report analyzes data from 311 Calls, restaurant violations, housing violations and population by zip code for New York City. The calls and violations data is from the year 2016 with corresponding population by zip code data from the year 2010. 
 
@@ -86,7 +86,7 @@ The data dictionary is located at the following [link.](https://docs.google.com/
 
 #### Zip codes
 
-Zip code is the common variable accross all tables. The main issue with zip code date was the format: some zip code data points only had 4 digits, others had foreign characters like dashes or thiks. This issue was solved by removing any non-numeric characters from the zip code data and by only selecing the first 5 elements. This doesn't solve all the problems with the zip code variable (there are typos and other possible errors) but it did enough to have a good match between all tables. Finally, the zip code data was filtered in all tables to be between $10001$ and $11697$, which is the range that corresponds to New York City.
+Zip code is the common variable across all tables. The main issue with zip code date was the format: some zip code data points only had 4 digits, others had foreign characters like dashes or ticks. This issue was solved by removing any non-numeric characters from the zip code data and by only selecting the first 5 elements. This doesn't solve all the problems with the zip code variable (there are typos and other possible errors) but it did enough to have a good match between all tables. Finally, the zip code data was filtered in all tables to be between $10001$ and $11697$, which is the range that corresponds to New York City.
 
 #### Restaurant Violations (all years)  - nycrestaurants
 
@@ -110,7 +110,7 @@ Findings:
 
 #### Housing Violations (all years) - housingviolations
 
-This file contains the housing violation history for the boroughs of Brooklyn, Bronx, Manhattan, Queens and Staten Island. The records clearly state when the inspection occured, the location address, the description of the violation, followed by the current status. It is worth mentioning that this file has most of the records with consistent information, and no issues were found while processing the information. 
+This file contains the housing violation history for the boroughs of Brooklyn, Bronx, Manhattan, Queens and Staten Island. The records clearly state when the inspection occurred, the location address, the description of the violation, followed by the current status. It is worth mentioning that this file has most of the records with consistent information, and no issues were found while processing the information. 
 
 #### 311 Calls for 2016 - NYC311calls2016
 
@@ -122,9 +122,9 @@ Findings:
 
 + The detail for each incident is more than what is needed for analysis, so most filed that did not correlate to the other data table were discarded. This will make the data table lighter and easier to analyze.
 
-+ For anallysis purposes, this data table was divided into two seperate tables. One consisted of housing call, the other of restaurant calls. To split this data table appropriatly, the New York City open data website was referenced.
++ For analysis purposes, this data table was divided into two separate tables. One consisted of housing call, the other of restaurant calls. To split this data table appropriately, the New York City open data website was referenced.
 
-To also include visualizations violation locations could be overlayed with maps, a method to plot observations by zip code need to be found. Even though the table nyc311calls2016 provided geo location for all calls, there was no way to match each location to the other tables, therefore another, more general way of plotting all this information in a map was needed. A simple and fast approach is to use the latitude and longitude of the center point for each zip code. This data was readily available for all US zip codes in the R package called "zipcode", and so this package was called using the command`data("zipcode")`.
+To also include visualizations violation locations could be over-layed with maps, a method to plot observations by zip code need to be found. Even though the table nyc311calls2016 provided geo location for all calls, there was no way to match each location to the other tables, therefore another, more general way of plotting all this information in a map was needed. A simple and fast approach is to use the latitude and longitude of the center point for each zip code. This data was readily available for all US zip codes in the R package called "zipcode", and so this package was called using the command`data("zipcode")`.
 
 **Difficulties**: 
 
@@ -136,7 +136,7 @@ To also include visualizations violation locations could be overlayed with maps,
 
 * There were multiple complications when trying to connect to Hive in the Big Data instances. High traffic contributed to this issue because several other students were trying to access the instances at the same time. However, this is a hypothesis and is difficult to validate. In addition, the large amount of logs that were created eventually filled the quota of space available on the server. This also represented a problem when trying to install several R packages needed for the visualizations. The solution was to contact the cluster administrator (Professor White) and ask to have the packages installed and made accessible to students.
 
-* While building the data dictionary, understanding the meaning of some of the variables was difficult. The following website was used as a source to better understind the variables: [NYC OpenData website] (https://opendata.cityofnewyork.us/).
+* While building the data dictionary, understanding the meaning of some of the variables was difficult. The following website was used as a source to better understand the variables: [NYC OpenData website] (https://opendata.cityofnewyork.us/).
 
 ##Data Cleaning Process
 
@@ -144,7 +144,7 @@ The first step of the data cleaning process was to create the team database in h
 
 The second step focused on cleaning the data under zip code in all three tables. Some of the zip codes had incorrect formatting, such as additional digits and symbols. The symbols were removed and the first five digits were extracted as "true" zip codes. Subsequently, the zip codes were converted to numbers and filtered to only include those in New York City (Between 10001 and 11697). 
 
-Additional steps in the Data Cleaining Process:
+Additional steps in the Data Cleaning Process:
 
 * The NYC 311 calls were restricted by location type of violation to initially include: restaurant, residential, family, and private house. However, further inspection into the 311 call files revealed that other types of location should be included, namely, apartment and residence. As for the restaurant violation files, the following were added for filtration: bars, clubs, bakery, deli, cafeteria, catering, food cart, and soup kitchen. The new approach is meant to broaden the selection process and improve the accuracy of the results.
 
@@ -245,7 +245,7 @@ renderPlot({
 })
 ```
 
-The above plots depict monthly housing violations and housing calls. The most interesting aspect of these plots is the relative increase in housing violations for October compared to the relatve decrease in housing call for October. Housing calls in October fell off dramatically compared to the previous months while housing violation increased dramatically. This might indicate that the housing calls are only for part of the month and are not complete for the month of October.
+The above plots depict monthly housing violations and housing calls. The most interesting aspect of these plots is the relative increase in housing violations for October compared to the relative decrease in housing call for October. Housing calls in October fell off dramatically compared to the previous months while housing violation increased dramatically. This might indicate that the housing calls are only for part of the month and are not complete for the month of October.
 
 ```{r houseVis1, fig.height=5, fig.width=15, retina=1, message=FALSE}
 fluidRow(
@@ -290,7 +290,7 @@ renderPlot({
 })
 ```
 
-The above plots depict monthly restaurant violations and restaurant calls. The most interesting aspect of these plots is the relative the relatve decrease in restaurant calls for October. Restaurant calls in October fell off dramatically compared to the previous months. This might indicate that the restaurant calls are only for part of the month and are not completefor the month of October.
+The above plots depict monthly restaurant violations and restaurant calls. The most interesting aspect of these plots is the relative the relative decrease in restaurant calls for October. Restaurant calls in October fell off dramatically compared to the previous months. This might indicate that the restaurant calls are only for part of the month and are not complete for the month of October.
 
 ```{r resVis, fig.height=5, fig.width=15, retina=1}
 fluidRow(
@@ -375,7 +375,7 @@ Restaurant violations plotted against population do not show the same pattern bu
 
 ### Analysis by zip code only
 
-Brining additional views into R for visualization. These views are by zip code only and are merged by zip code and loaded below:
+Bringing additional views into R for visualization. These views are by zip code only and are merged by zip code and loaded below:
 
 ```{r load data }
 # allbyzip <- dbGetQuery(conn, "select * from cadms.allbyzip")
@@ -435,7 +435,7 @@ allbyzip %>%
     theme_tufte()
 ```
 
-As with the truncated dataset from the earlier analysis, there is a strong linear relationship between the number of 311 calls by zip code plotted against the number of housing violations. The effects of heteroscedasticity are present and expected because the data is of count type. 
+As with the truncated data set from the earlier analysis, there is a strong linear relationship between the number of 311 calls by zip code plotted against the number of housing violations. The effects of heteroscedasticity are present and expected because the data is of count type. 
 
 ### Restaurants
 
@@ -541,13 +541,13 @@ Lower Manhattan has the highest density of restaurant violations, followed dista
 
 ##Conclusion
 
-The above R markdown document is team CADMS' demonstration of the learning objectives set for the Big Data post-module period. The learning objectives included: how to interact with hive, how to understand and clean multiple databases, how to merge disparate data into one database, and finally how to analyze the data in order to draw conclusions and make correlations. To meet these objectives, Team CADMS created an interactive narrative of the step-by-step process followed since the post-module period began. The initial steps included accessing, understanding, and cleaning the data, followed by filtering the data to merge it into a single analyzable database. The final step was to conduct analysis and create visualizations to understand connections and correlations present in the data. Ultimatly, through team collaboration and persistant effort, Team CADMS learned a lot about each other and about Big Data!
+The above R markdown document is team CADMS' demonstration of the learning objectives set for the Big Data post-module period. The learning objectives included: how to interact with hive, how to understand and clean multiple databases, how to merge disparate data into one database, and finally how to analyze the data in order to draw conclusions and make correlations. To meet these objectives, Team CADMS created an interactive narrative of the step-by-step process followed since the post-module period began. The initial steps included accessing, understanding, and cleaning the data, followed by filtering the data to merge it into a single analyzable database. The final step was to conduct analysis and create visualizations to understand connections and correlations present in the data. Ultimately, through team collaboration and persistent effort, Team CADMS learned a lot about each other and about Big Data!
 
 ##APPENDIX
 
 ###Data Dictionary
 
-Here is the link to data dictionaty is here
+Here is the link to data dictionary is here
 
 [**CLICK HERE**](https://docs.google.com/spreadsheets/d/1JmR_Ltpbqzho_SWPS-0K1CfEyaVPVwluhBMAzfY7sNM/edit?usp=sharing)
 
